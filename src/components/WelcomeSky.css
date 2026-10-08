@@ -1,0 +1,10 @@
+.welcome-space { position: absolute; inset: 0 0 auto; height: min(48svh, 450px); pointer-events: none; z-index: -1; }
+.space-nebula { position: absolute; inset: 0 -10% -60%; background: radial-gradient(ellipse at 72% 15%, #5abaff1c, transparent 45%), radial-gradient(ellipse at 24% 30%, #68d4ff12, transparent 35%), linear-gradient(#040c2533, transparent 80%); mask-image: linear-gradient(#000 60%, transparent); }
+.space-starfield { position: absolute; width: 100%; height: 100%; overflow: visible; }
+.space-moon { position: absolute; top: clamp(85px, 11svh, 135px); right: 17%; width: clamp(125px, 12vw, 198px); aspect-ratio: 1; isolation: isolate; }
+.space-moon::before { content: ''; position: absolute; inset: 12%; border-radius: 50%; background: #c7eaff16; filter: blur(28px); }
+.space-moon img { position: relative; display: block; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0 14px #bedfff12); }
+@media (min-width: 1600px) { .space-moon { right: 20%; } }
+@media (max-width: 640px) { .welcome-space { height: 32svh; } .space-moon { width: 100px; top: 88px; right: 10%; } .space-starfield { opacity: .7; } }
+@media (max-height: 650px) { .space-moon { width: 90px; top: 70px; right: 17%; } }
+@media (max-height: 440px) { .space-moon { display: none; } }

@@ -1,0 +1,27 @@
+.reactive-name {
+  position: relative; width: fit-content; isolation: isolate;
+  --name-x: 50%; --name-y: 50%; --name-tilt-x: 0deg; --name-tilt-y: 0deg;
+  transform: perspective(700px) rotateX(0deg) rotateY(0deg);
+  transition: transform 350ms cubic-bezier(.2,.8,.2,1);
+}
+.name-wordmark { position: relative; display: inline-flex; align-items: baseline; white-space: nowrap; color: #f7fbff; }
+.name-text { display: block; }
+.name-dot { display: block; flex: 0 0 auto; color: var(--warm); transition: color 250ms ease, text-shadow 250ms ease, transform 350ms ease; }
+.reactive-name::before {
+  content: ''; position: absolute; inset: -20% -8%; z-index: -1; pointer-events: none;
+  background: radial-gradient(ellipse at var(--name-x) var(--name-y), #6bdfff26, transparent 65%);
+  filter: blur(22px); opacity: 0; transition: opacity 300ms ease;
+}
+.name-trigger { display: block; border: 0; padding: 0; background: transparent; color: inherit; font: inherit; letter-spacing: inherit; line-height: inherit; cursor: pointer; }
+.welcome-identity .reactive-name { z-index: 2; pointer-events: auto; margin-inline: auto; }
+@media (hover: hover) and (pointer: fine) {
+  .reactive-name:hover { transform: perspective(700px) rotateX(var(--name-tilt-x)) rotateY(var(--name-tilt-y)) translateY(-3px) scale(1.015); }
+  .reactive-name:hover::before { opacity: 1; }
+  .reactive-name:hover .name-text { background: radial-gradient(ellipse at var(--name-x) var(--name-y), #8cecff, #e4faff 28%, #ffd2b5 60%, #f7fbff 85%); background-clip: text; -webkit-background-clip: text; color: transparent; }
+  .reactive-name:hover .name-dot { color: #7ce6ff; text-shadow: 0 0 22px #71dcff99; transform: translateY(-2px); }
+}
+.reactive-name:focus-within::before { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .reactive-name:hover { transform: none; }
+  .reactive-name:hover .name-dot { transform: none; }
+}
