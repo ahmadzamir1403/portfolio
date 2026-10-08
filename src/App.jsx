@@ -18,10 +18,29 @@ function ProjectArt({ project, small = false }) {
 function ProjectGallery({ project }) {
   const [selected, setSelected] = useState(0)
   const screenshot = project.screenshots[selected]
-  return <div className="project-gallery">
-    <a className="gallery-preview" href={screenshot.src} target="_blank" rel="noreferrer" aria-label={`Open ${screenshot.label} screenshot in full size`}>
-      <img src={screenshot.src} alt={`${project.title}: ${screenshot.label}`} width="1920" height="980" />
-    </a>
+  function step(direction) {
+    setSelected(index => (index + direction + project.screenshots.length) % project.screenshots.length)
+  }
+  return <div className="project-gallery" role="region" aria-label={`${project.title} screenshot gallery`} onKeyDown={event => {
+    if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      event.preventDefault()
+      step(event.key === 'ArrowLeft' ? -1 : 1)
+    }
+  }}>
+    <div className="gallery-stage">
+      <a className="gallery-preview" href={screenshot.src} target="_blank" rel="noreferrer" aria-label={`Open ${screenshot.label} screenshot in full size`}>
+        {project.screenshots.map((item, index) => <img key={item.src} className={`gallery-slide ${index === selected ? 'is-active' : ''}`} src={item.src} alt={`${project.title}: ${item.label}`} aria-hidden={index !== selected} width="1920" height="980" draggable="false" />)}
+      </a>
+      <button className="gallery-arrow gallery-arrow-prev" type="button" aria-label="Previous screenshot" onClick={() => step(-1)}>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14 6-6 6 6 6" /></svg>
+      </button>
+      <button className="gallery-arrow gallery-arrow-next" type="button" aria-label="Next screenshot" onClick={() => step(1)}>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6 6 6-6 6" /></svg>
+      </button>
+      <span className="gallery-count" aria-hidden="true">{selected + 1} / {project.screenshots.length}</span>
+    </div>
+    <p className="sr-only" role="status">{screenshot.label}, screenshot {selected + 1} of {project.screenshots.length}</p>
     <div className="gallery-options" role="group" aria-label={`${project.title} screenshots`}>
       {project.screenshots.map((item, index) => <button type="button" key={item.src} aria-pressed={selected === index} onClick={() => setSelected(index)}>
         <img src={item.src} alt="" width="192" height="98" loading="lazy" />
