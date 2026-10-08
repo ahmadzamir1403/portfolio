@@ -23,22 +23,24 @@ export default function LandingParticles({ paused }) {
     function draw() {
       context.clearRect(0, 0, width, height)
       for (const particle of particles) {
-        const opacity = (.2 + particle.depth * .5) * (.8 + Math.sin(elapsed * .6 + particle.phase) * .2)
-        const color = particle.depth > .65 ? '197, 161, 108' : '151, 123, 83'
-        if (particle.depth > .65) {
-          const radius = particle.radius * 5
-          const glow = context.createRadialGradient(particle.x, particle.y, 0, particle.x, particle.y, radius)
-          glow.addColorStop(0, 'rgba(' + color + ',' + opacity * .25 + ')')
-          glow.addColorStop(1, 'rgba(' + color + ',0)')
-          context.fillStyle = glow
+        const opacity = (.1 + particle.depth * .38) * (.8 + Math.sin(elapsed * .6 + particle.phase) * .2)
+        const color = particle.depth > .96 ? '239, 215, 164' : particle.depth > .65 ? '183, 143, 88' : '139, 111, 76'
+        if (particle.depth > .82) {
+          const radius = particle.radius * 1.6
+          const bokeh = context.createRadialGradient(particle.x, particle.y, 0, particle.x, particle.y, radius)
+          bokeh.addColorStop(0, 'rgba(' + color + ',' + opacity + ')')
+          bokeh.addColorStop(.55, 'rgba(' + color + ',' + opacity * .8 + ')')
+          bokeh.addColorStop(1, 'rgba(' + color + ',0)')
+          context.fillStyle = bokeh
           context.beginPath()
           context.arc(particle.x, particle.y, radius, 0, Math.PI * 2)
           context.fill()
+        } else {
+          context.fillStyle = 'rgba(' + color + ',' + opacity + ')'
+          context.beginPath()
+          context.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2)
+          context.fill()
         }
-        context.fillStyle = 'rgba(' + color + ',' + opacity + ')'
-        context.beginPath()
-        context.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2)
-        context.fill()
       }
     }
     function resize() {
@@ -48,7 +50,7 @@ export default function LandingParticles({ paused }) {
       canvas.width = Math.round(width * ratio)
       canvas.height = Math.round(height * ratio)
       context.setTransform(ratio, 0, 0, ratio, 0, 0)
-      particles = createParticleLine(width < 640 ? 100 : 190, width, height)
+      particles = createParticleLine(width < 640 ? 230 : 420, width, height)
       draw()
     }
     function tick(now) {
@@ -64,10 +66,10 @@ export default function LandingParticles({ paused }) {
       frame = window.requestAnimationFrame(tick)
     }
     function scatter(event) {
-      if (!canAnimate() || event.isPrimary === false || event.button !== 0) return
-      if (event.target.closest('button, a')) return
+      if (!canAnimate() || event.button !== 0) return
+      if (event.target.closest('.welcome-motion')) return
       const bounds = canvas.getBoundingClientRect()
-      scatterParticleLine(particles, event.clientX - bounds.left, event.clientY - bounds.top)
+      scatterParticleLine(particles, event.detail === 0 ? width / 2 : event.clientX - bounds.left, event.detail === 0 ? height / 2 : event.clientY - bounds.top)
     }
     function sync() {
       window.cancelAnimationFrame(frame)
@@ -81,13 +83,13 @@ export default function LandingParticles({ paused }) {
     observer.observe(canvas)
     resize()
     sync()
-    screen.addEventListener('pointerdown', scatter, { passive: true })
+    screen.addEventListener('click', scatter)
     document.addEventListener('visibilitychange', sync)
     motion.addEventListener('change', sync)
     return () => {
       window.cancelAnimationFrame(frame)
       observer.disconnect()
-      screen.removeEventListener('pointerdown', scatter)
+      screen.removeEventListener('click', scatter)
       document.removeEventListener('visibilitychange', sync)
       motion.removeEventListener('change', sync)
     }

@@ -1,10 +1,11 @@
 .welcome-screen {
   position: fixed; inset: 0; z-index: 200; isolation: isolate; overflow: hidden;
   display: grid; place-items: center; min-height: 100svh;
-  background: radial-gradient(ellipse at 78% 28%, #75604c38, transparent 60%), radial-gradient(ellipse at 95% 85%, #9b794c1f, transparent 48%), linear-gradient(145deg, #302c2e, #252427 70%);
+  background: radial-gradient(ellipse at 8% 8%, #69605c66, transparent 58%), radial-gradient(ellipse at 23% 96%, #74757238, transparent 48%), linear-gradient(110deg, #29272b, #141419 62%, #080910);
   opacity: 1; transition: opacity 520ms ease, transform 520ms ease;
 }
-.welcome-screen.is-leaving { opacity: 0; transform: scale(1.035); pointer-events: none; }
+.welcome-screen.is-leaving { pointer-events: none; animation: welcome-depart 900ms ease both; }
+@keyframes welcome-depart { 0%, 30% { opacity: 1; transform: none; } 100% { opacity: 0; transform: scale(1.035); } }
 .welcome-screen .particle-background { height: 100%; mask-image: none; }
 .welcome-screen .light-ribbon { top: 45%; }
 .welcome-screen .ribbon-back { top: 38%; }
@@ -21,11 +22,11 @@
 .welcome-identity h1 { font-size: clamp(40px, 6.8vw, 92px); font-weight: 300; line-height: 1.18; letter-spacing: -3px; }
 .welcome-identity h1 .name-dot { color: var(--warm); }
 .welcome-subtitle { margin-top: 23px; color: #e2dfd9; font-size: 14px; letter-spacing: .2px; }
-.welcome-enter { position: absolute; bottom: max(13%, 95px); left: 50%; transform: translateX(-50%); z-index: 1; padding: 0; border: 0; border-radius: 6px; background: transparent; color: #f5f4f3; cursor: pointer; }
-/* Background presses scatter the stream; this visible control enters the portfolio. */
+.welcome-enter { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; padding: 0; border: 0; background: transparent; color: #f5f4f3; cursor: pointer; }
+/* The whole viewport enters; the visible prompt carries keyboard focus. */
 .welcome-enter:focus, .welcome-enter:focus-visible { outline: none; }
 .welcome-enter:focus-visible .welcome-enter-icon { outline: 2px solid #dedad3; outline-offset: 6px; }
-.welcome-prompt { display: flex; align-items: center; font-size: 12px; letter-spacing: .6px; white-space: nowrap; }
+.welcome-prompt { position: absolute; bottom: max(13%, 95px); left: 0; width: 100%; display: flex; justify-content: center; font-size: 12px; letter-spacing: .6px; white-space: nowrap; }
 .welcome-enter-icon { display: grid; place-items: center; width: 48px; height: 48px; border: 0; border-radius: 50%; font-size: 24px; font-weight: 300; background: #d3cec5; color: #32302d; box-shadow: 0 5px 35px #d7c19c1c; transition: background 250ms ease, transform 250ms ease, box-shadow 250ms ease; }
 .welcome-enter:hover .welcome-enter-icon { background: #e0dcd6; transform: translateX(3px); box-shadow: 0 5px 38px #d7c19c33; }
 .welcome-keyboard { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; letter-spacing: .3px; color: #d9cbb3; }
@@ -41,7 +42,7 @@
   .welcome-identity h1 { font-size: clamp(36px, 8.6vw, 55px); letter-spacing: -2px; }
   .welcome-monogram { font-size: 30px; margin-bottom: 24px; }
   .welcome-eyebrow { font-size: 8px; letter-spacing: 3px; }
-  .welcome-enter { bottom: max(13%, 85px); }
+  .welcome-prompt { bottom: max(13%, 85px); }
   .welcome-subtitle { font-size: 12px; }
   .welcome-bottom { font-size: 7px; letter-spacing: 1.7px; }
 }
@@ -51,13 +52,13 @@
   .welcome-identity h1 { font-size: 42px; }
   .welcome-eyebrow { margin-bottom: 12px; }
   .welcome-subtitle { margin-top: 14px; }
-  .welcome-enter { bottom: 30px; }
+  .welcome-prompt { bottom: 30px; }
   .welcome-enter-icon { width: 36px; height: 36px; font-size: 20px; }
   .welcome-bottom { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .welcome-screen { transition: none; } .welcome-enter:hover .welcome-enter-icon { transform: none; } }
 
-.welcome-enter-label { padding: 12px 22px; border: 1px solid #e0dcd666; border-radius: 6px; }
+.welcome-enter-label { padding: 12px 22px; border-radius: 6px; color: #dad5cc; }
 .welcome-enter:hover .welcome-enter-label { background: #ffffff0d; }
 .welcome-enter:focus-visible .welcome-enter-label { outline: 2px solid #dedad3; outline-offset: 6px; }
 
