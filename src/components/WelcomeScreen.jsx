@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import LandingParticles from './LandingParticles'
 import ReactiveName from './ReactiveName'
+import WelcomeSky from './WelcomeSky'
 import './WelcomeScreen.css'
 
 export default function WelcomeScreen({ paused, onToggleMotion, onEnter }) {
@@ -28,6 +29,7 @@ export default function WelcomeScreen({ paused, onToggleMotion, onEnter }) {
 
   return <section className={`welcome-screen ${leaving ? 'is-leaving' : ''}`} aria-label="Welcome to Ahmad Zamir's portfolio">
     <LandingParticles paused={paused} />
+    <WelcomeSky paused={paused} />
     <div className="welcome-top"><span className="welcome-brand" aria-hidden="true">az /</span></div>
     <button className="welcome-motion" type="button" onClick={onToggleMotion} aria-label={paused ? 'Play background animation' : 'Pause background animation'}>{paused ? 'Play ambience' : 'Pause ambience'}</button>
     <div className="welcome-identity">
