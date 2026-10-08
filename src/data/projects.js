@@ -38,8 +38,15 @@ export const projects = [
   },
   {
     "id": "logbook",
-    "thumbnail": "/projects/logbook.svg",
+    "thumbnail": "/projects/logbook-sticker.png",
     "artwork": "/projects/logbook-art.svg",
+    "screenshots": [
+      { "src": "/projects/logbook-entries.png", "label": "Daily entries" },
+      { "src": "/projects/logbook-add-entry.png", "label": "Add a day" },
+      { "src": "/projects/logbook-internships.png", "label": "Internships" },
+      { "src": "/projects/logbook-pdf.png", "label": "PDF tools" },
+      { "src": "/projects/logbook-home.png", "label": "Welcome page" }
+    ],
     "title": "Internship Logbook",
     "category": "Full-stack application",
     "mark": "Lb",

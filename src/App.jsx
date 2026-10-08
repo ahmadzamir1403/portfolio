@@ -10,8 +10,24 @@ const linkedin = 'https://www.linkedin.com/in/ahmad-zamir-823105232'
 const email = 'https://mail.google.com/mail/?view=cm&fs=1&to=ahmadzamir1403%40gmail.com'
 
 function ProjectArt({ project, small = false }) {
-  return <div className={`project-art art-${project.theme} ${small ? 'art-small thumbnail-art' : 'featured-illustration'}`} aria-hidden="true">
+  return <div className={`project-art art-${project.theme} project-art-${project.id} ${small ? 'art-small thumbnail-art' : 'featured-illustration'}`} aria-hidden="true">
     <img src={small ? project.thumbnail : project.artwork} alt="" width="320" height="256" draggable="false" />
+  </div>
+}
+
+function ProjectGallery({ project }) {
+  const [selected, setSelected] = useState(0)
+  const screenshot = project.screenshots[selected]
+  return <div className="project-gallery">
+    <a className="gallery-preview" href={screenshot.src} target="_blank" rel="noreferrer" aria-label={`Open ${screenshot.label} screenshot in full size`}>
+      <img src={screenshot.src} alt={`${project.title}: ${screenshot.label}`} width="1920" height="980" />
+    </a>
+    <div className="gallery-options" role="group" aria-label={`${project.title} screenshots`}>
+      {project.screenshots.map((item, index) => <button type="button" key={item.src} aria-pressed={selected === index} onClick={() => setSelected(index)}>
+        <img src={item.src} alt="" width="192" height="98" loading="lazy" />
+        <span>{item.label}</span>
+      </button>)}
+    </div>
   </div>
 }
 
@@ -85,7 +101,7 @@ export default function App() {
               <a className="button" href={project.url || github + '/' + project.id} target={project.url?.startsWith('mailto:') ? undefined : '_blank'} rel="noreferrer">{project.actionLabel || 'View on GitHub'}</a>
               
             </div>
-            <div className="featured-art" key={project.id + '-art'}><ProjectArt project={project} /></div>
+            <div className={`featured-art ${project.screenshots ? 'has-gallery' : ''}`} key={project.id + '-art'}>{project.screenshots ? <ProjectGallery project={project} /> : <ProjectArt project={project} />}</div>
           </div>
           <p className="sr-only" role="status">Selected project: {project.title}</p>
           
