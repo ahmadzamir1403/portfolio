@@ -25,12 +25,18 @@
 .project-tile:hover .thumbnail-art img { transform: scale(1.035); }
 
 .thumbnail-art.project-art-logbook img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: center; }
-.project-launch { position: fixed; inset: 0; z-index: 100; pointer-events: none; background: #06142a; animation: project-launch-veil 720ms ease both; }
-.project-launch-tile { position: absolute; left: 50%; top: 50%; width: var(--launch-width); height: var(--launch-height); margin-left: calc(var(--launch-width) / -2); margin-top: calc(var(--launch-height) / -2); border-radius: 12px; overflow: hidden; box-shadow: 0 0 0 2px #a4f0ff, 0 0 70px #79e5ff44; animation: project-launch-zoom 720ms cubic-bezier(.2,.75,.25,1) both; }
-.project-entering .featured-copy, .project-entering .featured-art { animation: project-content-zoom 720ms cubic-bezier(.2,.75,.25,1) both; }
-@keyframes project-launch-veil { 0% { background: #06142a00; opacity: 1; } 35% { background: #06142ab8; opacity: 1; } 65% { opacity: 1; } 100% { background: #06142a00; opacity: 0; } }
-@keyframes project-launch-zoom { 0% { transform: translate(var(--launch-x), var(--launch-y)) scale(1); opacity: 1; } 55% { transform: translate(0, 0) scale(2.1); opacity: 1; } 100% { transform: translate(0, 0) scale(3.3); opacity: 0; } }
-@keyframes project-content-zoom { 0%, 28% { opacity: 0; transform: scale(.94) translateY(12px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+.project-launch { position: fixed; inset: 0; z-index: 100; pointer-events: none; animation: project-launch-lifetime 620ms linear both; }
+.project-launch::before { content: ''; position: absolute; inset: 0; background: #06142a; animation: project-launch-veil 620ms ease both; }
+.project-launch-tile { position: absolute; left: 50%; top: 50%; width: var(--launch-width); height: var(--launch-height); margin-left: calc(var(--launch-width) / -2); margin-top: calc(var(--launch-height) / -2); border-radius: 12px; overflow: hidden; box-shadow: 0 0 0 1px #a4f0ff88, 0 12px 40px #03112655; will-change: transform, opacity; animation: project-launch-zoom 620ms cubic-bezier(.22,1,.36,1) both, project-launch-dissolve 620ms linear both; }
+.project-launch-tile .thumbnail-art img { position: absolute; inset: 0; }
+.project-entering .featured-copy { animation: project-copy-reveal 460ms 80ms cubic-bezier(.22,1,.36,1) both; }
+.project-entering .featured-art { transform-origin: center; animation: project-art-reveal 460ms 160ms cubic-bezier(.22,1,.36,1) both; }
+@keyframes project-launch-lifetime { from { visibility: visible; } to { visibility: visible; } }
+@keyframes project-launch-veil { 0%, 100% { opacity: 0; } 30% { opacity: .24; } }
+@keyframes project-launch-zoom { from { transform: translate3d(var(--launch-x), var(--launch-y), 0) scale(1); } to { transform: translate3d(var(--launch-target-x), var(--launch-target-y), 0) scale(var(--launch-scale)); } }
+@keyframes project-launch-dissolve { 0%, 25% { opacity: 1; } 80%, 100% { opacity: 0; } }
+@keyframes project-copy-reveal { from { opacity: 0; transform: translate3d(0, 8px, 0); } to { opacity: 1; transform: translate3d(0, 0, 0); } }
+@keyframes project-art-reveal { from { opacity: 0; transform: scale(.975); } to { opacity: 1; transform: scale(1); } }
 @media (prefers-reduced-motion: reduce) { .project-launch { display: none; } }
 .featured-art.has-gallery { height: auto; min-width: 0; width: 100%; padding-block: 24px; }
 .project-gallery { width: 100%; }

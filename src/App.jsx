@@ -34,10 +34,12 @@ function ProjectGallery({ project }) {
 export default function App() {
   const [selected, setSelected] = useState(0)
   const [launch, setLaunch] = useState(null)
+  const [hasSelectedProject, setHasSelectedProject] = useState(false)
   const launchSequence = useRef(0)
   const [ambiencePaused, setAmbiencePaused] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   const [entered, setEntered] = useState(() => Boolean(window.location.hash))
   const mainRef = useRef(null)
+  const featuredArtRef = useRef(null)
   const enteredFromWelcome = useRef(false)
   const enterPortfolio = useCallback(() => {
     enteredFromWelcome.current = true
@@ -48,18 +50,41 @@ export default function App() {
   }, [entered])
   const tiles = useRef([])
   const project = projects[selected]
-  function selectProject(index) {
+  useEffect(() => {
+    if (!launch) return
+    const cancel = () => setLaunch(null)
+    const timeout = window.setTimeout(cancel, 700)
+    window.addEventListener('resize', cancel)
+    window.addEventListener('scroll', cancel, true)
+    return () => {
+      window.clearTimeout(timeout)
+      window.removeEventListener('resize', cancel)
+      window.removeEventListener('scroll', cancel, true)
+    }
+  }, [launch])
+  function selectProject(index, cinematic = true) {
+    if (index === selected) return
     setSelected(index)
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    setHasSelectedProject(true)
+    setLaunch(null)
+    ++launchSequence.current
+    if (!cinematic || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     const rect = tiles.current[index]?.firstElementChild.getBoundingClientRect()
-    if (!rect) return
+    const destination = featuredArtRef.current?.getBoundingClientRect()
+    if (!rect || !destination) return
+    const scale = Math.min(2.1, destination.width * .7 / rect.width, (window.innerHeight - 48) / rect.height)
+    const halfHeight = rect.height * scale / 2
+    const targetY = Math.max(halfHeight + 24, Math.min(window.innerHeight - halfHeight - 24, destination.top + destination.height / 2))
     setLaunch({
-      id: ++launchSequence.current,
+      id: launchSequence.current,
       index,
       x: rect.left + rect.width / 2 - window.innerWidth / 2,
       y: rect.top + rect.height / 2 - window.innerHeight / 2,
       width: rect.width,
       height: rect.height,
+      targetX: destination.left + destination.width / 2 - window.innerWidth / 2,
+      targetY: targetY - window.innerHeight / 2,
+      scale,
     })
   }
   function navigateProjects(event, index) {
@@ -70,7 +95,7 @@ export default function App() {
     if (event.key === 'End') next = projects.length - 1
     if (next !== undefined) {
       event.preventDefault()
-      selectProject(next)
+      selectProject(next, false)
       tiles.current[next]?.focus({ preventScroll: true })
       tiles.current[next]?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
     }
@@ -79,7 +104,7 @@ export default function App() {
     {!entered && <WelcomeScreen paused={ambiencePaused} onToggleMotion={() => setAmbiencePaused(value => !value)} onEnter={enterPortfolio} />}
     <div inert={!entered} aria-hidden={!entered}>
     {launch && <div key={launch.id} className="project-launch" aria-hidden="true" onAnimationEnd={event => { if (event.target === event.currentTarget) setLaunch(null) }}>
-      <div className="project-launch-tile" style={{ '--launch-x': `${launch.x}px`, '--launch-y': `${launch.y}px`, '--launch-width': `${launch.width}px`, '--launch-height': `${launch.height}px` }}>
+      <div className="project-launch-tile" style={{ '--launch-x': `${launch.x}px`, '--launch-y': `${launch.y}px`, '--launch-width': `${launch.width}px`, '--launch-height': `${launch.height}px`, '--launch-target-x': `${launch.targetX}px`, '--launch-target-y': `${launch.targetY}px`, '--launch-scale': launch.scale }}>
         <ProjectArt project={projects[launch.index]} small />
       </div>
     </div>}
@@ -114,7 +139,7 @@ export default function App() {
             </button>)}
             <a className="all-work" href={github + '?tab=repositories'} target="_blank" rel="noreferrer"><span>More on GitHub</span></a>
           </div>
-          <div className={`featured ${launch ? 'project-entering' : ''}`} id="project-details">
+          <div className={`featured ${hasSelectedProject ? 'project-entering' : ''}`} id="project-details">
             <div className="featured-copy" key={project.id}>
               <p className="eyebrow"><span className="tiny-line" />{project.category}</p>
               <h3>{project.title}</h3><p className="project-description">{project.description}</p>
@@ -122,7 +147,7 @@ export default function App() {
               <a className="button" href={project.url || github + '/' + project.id} target={project.url?.startsWith('mailto:') ? undefined : '_blank'} rel="noreferrer">{project.actionLabel || 'View on GitHub'}</a>
               
             </div>
-            <div className={`featured-art ${project.screenshots ? 'has-gallery' : ''}`} key={project.id + '-art'}>{project.screenshots ? <ProjectGallery project={project} /> : <ProjectArt project={project} />}</div>
+            <div ref={featuredArtRef} className={`featured-art ${project.screenshots ? 'has-gallery' : ''}`} key={project.id + '-art'}>{project.screenshots ? <ProjectGallery project={project} /> : <ProjectArt project={project} />}</div>
           </div>
           <p className="sr-only" role="status">Selected project: {project.title}</p>
           
