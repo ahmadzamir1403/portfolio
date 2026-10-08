@@ -33,6 +33,8 @@ function ProjectGallery({ project }) {
 
 export default function App() {
   const [selected, setSelected] = useState(0)
+  const [launch, setLaunch] = useState(null)
+  const launchSequence = useRef(0)
   const [ambiencePaused, setAmbiencePaused] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   const [entered, setEntered] = useState(() => Boolean(window.location.hash))
   const mainRef = useRef(null)
@@ -46,6 +48,20 @@ export default function App() {
   }, [entered])
   const tiles = useRef([])
   const project = projects[selected]
+  function selectProject(index) {
+    setSelected(index)
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const rect = tiles.current[index]?.firstElementChild.getBoundingClientRect()
+    if (!rect) return
+    setLaunch({
+      id: ++launchSequence.current,
+      index,
+      x: rect.left + rect.width / 2 - window.innerWidth / 2,
+      y: rect.top + rect.height / 2 - window.innerHeight / 2,
+      width: rect.width,
+      height: rect.height,
+    })
+  }
   function navigateProjects(event, index) {
     let next
     if (event.key === 'ArrowRight') next = (index + 1) % projects.length
@@ -54,7 +70,7 @@ export default function App() {
     if (event.key === 'End') next = projects.length - 1
     if (next !== undefined) {
       event.preventDefault()
-      setSelected(next)
+      selectProject(next)
       tiles.current[next]?.focus({ preventScroll: true })
       tiles.current[next]?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
     }
@@ -62,6 +78,11 @@ export default function App() {
   return <>
     {!entered && <WelcomeScreen paused={ambiencePaused} onToggleMotion={() => setAmbiencePaused(value => !value)} onEnter={enterPortfolio} />}
     <div inert={!entered} aria-hidden={!entered}>
+    {launch && <div key={launch.id} className="project-launch" aria-hidden="true" onAnimationEnd={event => { if (event.target === event.currentTarget) setLaunch(null) }}>
+      <div className="project-launch-tile" style={{ '--launch-x': `${launch.x}px`, '--launch-y': `${launch.y}px`, '--launch-width': `${launch.width}px`, '--launch-height': `${launch.height}px` }}>
+        <ProjectArt project={projects[launch.index]} small />
+      </div>
+    </div>}
     <a className="skip-link" href="#main">Skip to content</a>
     <div className={`console theme-${project.theme}`} id="top">
       <ScrollSpace active={entered} paused={ambiencePaused} />
@@ -88,12 +109,12 @@ export default function App() {
         <section id="projects" className="work shell" aria-labelledby="work-title">
           <div className="section-heading"><h2 id="work-title">Selected work</h2><span className="section-counter">0{selected + 1} <span>/ 0{projects.length}</span></span></div>
           <div className="project-rail" role="group" aria-label="Choose a featured project">
-            {projects.map((item, index) => <button key={item.id} ref={el => { tiles.current[index] = el }} className={`project-tile ${index === selected ? 'is-selected' : ''}`} aria-pressed={index === selected} aria-controls="project-details" onClick={() => setSelected(index)} onKeyDown={event => navigateProjects(event, index)}>
+            {projects.map((item, index) => <button key={item.id} ref={el => { tiles.current[index] = el }} className={`project-tile ${index === selected ? 'is-selected' : ''}`} aria-pressed={index === selected} aria-controls="project-details" onClick={() => selectProject(index)} onKeyDown={event => navigateProjects(event, index)}>
               <ProjectArt project={item} small /><span className="tile-title">{item.title}</span>
             </button>)}
             <a className="all-work" href={github + '?tab=repositories'} target="_blank" rel="noreferrer"><span>More on GitHub</span></a>
           </div>
-          <div className="featured" id="project-details">
+          <div className={`featured ${launch ? 'project-entering' : ''}`} id="project-details">
             <div className="featured-copy" key={project.id}>
               <p className="eyebrow"><span className="tiny-line" />{project.category}</p>
               <h3>{project.title}</h3><p className="project-description">{project.description}</p>
