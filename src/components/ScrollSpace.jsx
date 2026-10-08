@@ -48,10 +48,10 @@ export default function ScrollSpace({ active, paused }) {
   return <div className="scroll-space" ref={backdropRef} aria-hidden="true">
     <div className="scroll-nebula" />
     <svg className="scroll-stars" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice" fill="none">
-      <defs><radialGradient id="scroll-starlight"><stop stopColor="#c5eaff" stopOpacity=".35" /><stop offset="1" stopColor="#c5eaff" stopOpacity="0" /></radialGradient></defs>
+      <defs><radialGradient id="scroll-starlight"><stop stopColor="#e6e3de" stopOpacity=".35" /><stop offset="1" stopColor="#e6e3de" stopOpacity="0" /></radialGradient></defs>
       {stars.map((star, index) => <g key={index} opacity={star.opacity} className={index % 2 ? 'star-secondary' : undefined}>
         {star.radius > 1.5 && <circle cx={star.x} cy={star.y} r="10" fill="url(#scroll-starlight)" />}
-        <circle cx={star.x} cy={star.y} r={star.radius} fill={index % 9 ? '#d5efff' : '#ffd7b0'} />
+        <circle cx={star.x} cy={star.y} r={star.radius} fill={index % 9 ? '#edebe7' : '#ddd9d2'} />
       </g>)}
     </svg>
     <div className="scroll-moon"><img className="scroll-moon-disc" src="/images/moon.png" width="512" height="512" alt="" draggable="false" /><MoonBattle paused={!active || paused} /></div>

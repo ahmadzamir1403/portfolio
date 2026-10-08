@@ -72,7 +72,7 @@ export default function ParticleBackground({ paused }) {
         // A quiet left side keeps the main text clear. More light lives on the right.
         const edgeFade = Math.min(1, y / 90, (height - y) / 150)
         const opacity = (0.14 + particle.depth * 0.42 + influence * 0.14) * shimmer * Math.max(0, edgeFade) * (x < width * 0.42 ? 0.5 : 1)
-        const color = particle.warm ? '255, 204, 154' : '145, 231, 255'
+        const color = particle.warm ? '197, 161, 108' : '151, 123, 83'
         const radius = particle.radius * (0.6 + particle.depth)
         if (particle.depth > 0.62) {
           const glow = context.createRadialGradient(x, y, 0, x, y, radius * 6)

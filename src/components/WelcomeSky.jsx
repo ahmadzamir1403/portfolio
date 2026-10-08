@@ -12,21 +12,21 @@ export default function WelcomeSky({ paused = false }) {
   return <div className="welcome-space" aria-hidden="true">
     <div className="space-nebula" />
     <svg className="space-starfield" viewBox="0 0 1600 400" fill="none" preserveAspectRatio="xMidYMid slice">
-      <defs><radialGradient id="sky-star-glow"><stop stopColor="#b6eaff" stopOpacity=".4" /><stop offset="1" stopColor="#b6eaff" stopOpacity="0" /></radialGradient></defs>
+      <defs><radialGradient id="sky-star-glow"><stop stopColor="#dfdcd6" stopOpacity=".4" /><stop offset="1" stopColor="#dfdcd6" stopOpacity="0" /></radialGradient></defs>
       {stars.map((star, index) => <g key={index} opacity={star.opacity}>
         {star.size > 1.5 && <circle cx={star.x} cy={star.y} r="11" fill="url(#sky-star-glow)" />}
-        <circle cx={star.x} cy={star.y} r={star.size} fill="#d3efff" />
+        <circle cx={star.x} cy={star.y} r={star.size} fill="#eceae6" />
       </g>)}
-      <g stroke="#a3dcff" strokeWidth=".7" opacity=".15">
+      <g stroke="#d7d3cb" strokeWidth=".7" opacity=".15">
         <path d="m230 155 75-48 72 28 58-58 65 38" />
         <path d="m305 107 29 87 43-59" />
       </g>
-      <g fill="#d6efff" opacity=".7">
+      <g fill="#edebe8" opacity=".7">
         {[[230,155],[305,107],[377,135],[435,77],[500,115],[334,194]].map(([x,y]) => <circle key={x} cx={x} cy={y} r="1.8" />)}
       </g>
-      <path d="M-100 320Q700-110 1700 90" stroke="#9fdfff" strokeOpacity=".08" />
-      <path d="M-100 348Q700-40 1700 130" stroke="#9fdfff" strokeOpacity=".05" />
-      <g stroke="#d7f5ff" strokeLinecap="round" opacity=".65">
+      <path d="M-100 320Q700-110 1700 90" stroke="#d5d1c9" strokeOpacity=".08" />
+      <path d="M-100 348Q700-40 1700 130" stroke="#d5d1c9" strokeOpacity=".05" />
+      <g stroke="#eeece8" strokeLinecap="round" opacity=".65">
         <path d="M623 61v8m-4-4h8M877 172v6m-3-3h6M1390 260v8m-4-4h8" />
       </g>
     </svg>

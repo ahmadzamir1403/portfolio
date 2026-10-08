@@ -4,12 +4,12 @@
   transform: perspective(700px) rotateX(0deg) rotateY(0deg);
   transition: transform 350ms cubic-bezier(.2,.8,.2,1);
 }
-.name-wordmark { position: relative; display: inline-flex; align-items: baseline; white-space: nowrap; color: #f7fbff; }
+.name-wordmark { position: relative; display: inline-flex; align-items: baseline; white-space: nowrap; color: #f5f1e9; }
 .name-text { display: block; }
 .name-dot { display: block; flex: 0 0 auto; color: var(--warm); transition: color 250ms ease, text-shadow 250ms ease, transform 350ms ease; }
 .reactive-name::before {
   content: ''; position: absolute; inset: -20% -8%; z-index: -1; pointer-events: none;
-  background: radial-gradient(ellipse at var(--name-x) var(--name-y), #6bdfff26, transparent 65%);
+  background: radial-gradient(ellipse at var(--name-x) var(--name-y), #d4bd9626, transparent 65%);
   filter: blur(22px); opacity: 0; transition: opacity 300ms ease;
 }
 .name-trigger { display: block; border: 0; padding: 0; background: transparent; color: inherit; font: inherit; letter-spacing: inherit; line-height: inherit; cursor: pointer; }
@@ -17,8 +17,8 @@
 @media (hover: hover) and (pointer: fine) {
   .reactive-name:hover { transform: perspective(700px) rotateX(var(--name-tilt-x)) rotateY(var(--name-tilt-y)) translateY(-3px) scale(1.015); }
   .reactive-name:hover::before { opacity: 1; }
-  .reactive-name:hover .name-text { background: radial-gradient(ellipse at var(--name-x) var(--name-y), #8cecff, #e4faff 28%, #ffd2b5 60%, #f7fbff 85%); background-clip: text; -webkit-background-clip: text; color: transparent; }
-  .reactive-name:hover .name-dot { color: #7ce6ff; text-shadow: 0 0 22px #71dcff99; transform: translateY(-2px); }
+  .reactive-name:hover .name-text { background: radial-gradient(ellipse at var(--name-x) var(--name-y), #deccad, #f3f2f0 28%, #dfdbd5 60%, #f5f1e9 85%); background-clip: text; -webkit-background-clip: text; color: transparent; }
+  .reactive-name:hover .name-dot { color: #d9c5a2; text-shadow: 0 0 22px #d6c09a99; transform: translateY(-2px); }
 }
 .reactive-name:focus-within::before { opacity: 1; }
 @media (prefers-reduced-motion: reduce) {

@@ -6,7 +6,7 @@
   overflow: hidden;
   pointer-events: none;
   contain: strict;
-  --light-color: 94, 214, 255;
+  --light-color: 197, 161, 108;
   mask-image: linear-gradient(#000 0%, #000 70%, transparent 100%);
 }
 .particle-background canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -30,8 +30,8 @@
   animation: horizon-breathe 14s ease-in-out infinite alternate;
 }
 .is-paused .light-ribbon, .is-paused .horizon-light { animation-play-state: paused; }
-.ambient-toggle { display: grid; place-items: center; flex-shrink: 0; width: 32px; height: 32px; margin-left: -42px; border: 1px solid var(--line); border-radius: 50%; color: #b1c4dd; background: #15213666; cursor: pointer; }
-.ambient-toggle:hover { color: white; border-color: #9ab5d477; }
+.ambient-toggle { display: grid; place-items: center; flex-shrink: 0; width: 32px; height: 32px; margin-left: -42px; border: 1px solid var(--line); border-radius: 50%; color: #cec9c0; background: #27262466; cursor: pointer; }
+.ambient-toggle:hover { color: white; border-color: #c8bca677; }
 .ambient-toggle svg { width: 12px; height: 12px; fill: currentColor; }
 @keyframes ribbon-drift { to { transform: translate3d(3%, 22px, 0) rotate(-10deg); } }
 @keyframes horizon-breathe { to { opacity: .4; transform: translate3d(-25px, 15px, 0); } }
@@ -49,11 +49,11 @@
 .reactive-light { position: absolute; inset: 0; transform: translate3d(var(--parallax-x, 0px), var(--parallax-y, 0px), 0) scale(1.05); }
 @media (prefers-reduced-motion: reduce) { .reactive-light { transform: none; } }
 
-/* A cool wash and warm glint follow the pointer with no visible edge. */
+/* A soft gold wash follows the pointer with no visible edge. */
 .cursor-aura {
   position: absolute; left: 0; top: 0; width: 600px; height: 440px;
   pointer-events: none;
-  background: radial-gradient(ellipse at 40% 45%, rgba(var(--light-color), .16), rgba(var(--light-color), .055) 35%, transparent 70%), radial-gradient(ellipse at 65% 60%, rgba(255, 193, 153, .09), transparent 60%);
+  background: radial-gradient(ellipse at 40% 45%, rgba(var(--light-color), .16), rgba(var(--light-color), .055) 35%, transparent 70%), radial-gradient(ellipse at 65% 60%, rgba(179, 140, 88, .09), transparent 60%);
   filter: blur(38px);
   opacity: var(--pointer-opacity, 0);
   transform: translate3d(var(--pointer-x, 0px), var(--pointer-y, 0px), 0) translate(-50%, -50%) rotate(-18deg);
