@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import ParticleBackground from './ParticleBackground'
+import LandingParticles from './LandingParticles'
 import ReactiveName from './ReactiveName'
 import WelcomeSky from './WelcomeSky'
 import './WelcomeScreen.css'
@@ -28,7 +28,7 @@ export default function WelcomeScreen({ paused, onToggleMotion, onEnter }) {
   }
 
   return <section className={`welcome-screen ${leaving ? 'is-leaving' : ''}`} aria-label="Welcome to Ahmad Zamir's portfolio">
-    <ParticleBackground paused={paused} />
+    <LandingParticles paused={paused} />
     <WelcomeSky paused={paused} />
     <div className="welcome-top"><span className="welcome-brand" aria-hidden="true">az /</span></div>
     <button className="welcome-motion" type="button" onClick={onToggleMotion} aria-label={paused ? 'Play background animation' : 'Pause background animation'}>{paused ? 'Play ambience' : 'Pause ambience'}</button>
@@ -36,7 +36,7 @@ export default function WelcomeScreen({ paused, onToggleMotion, onEnter }) {
       <div className="portrait-frame welcome-portrait"><img className="intro-portrait" src="/images/ahmad-zamir.png" alt="Ahmad Zamir" width="160" height="160" fetchPriority="high" /></div>
       
       
-      <ReactiveName onActivate={enter} />
+      <ReactiveName />
       <p className="welcome-subtitle">Computer Science student at UiTM.</p>
     </div>
     <button ref={enterRef} className="welcome-enter" type="button" onClick={enter} aria-label="Enter Ahmad Zamir's portfolio" aria-disabled={leaving}>
