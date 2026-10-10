@@ -161,7 +161,7 @@ export default function App() {
     window.history.replaceState(null, '', event.currentTarget.hash)
   }
   return <>
-    {!entered && <WelcomeScreen paused={ambiencePaused} onToggleMotion={() => setAmbiencePaused(value => !value)} onEnter={enterPortfolio} onPrepareEnter={prepareEntry} />}
+    {!entered && <WelcomeScreen paused={ambiencePaused} entryTargetRef={profileRef} onToggleMotion={() => setAmbiencePaused(value => !value)} onEnter={enterPortfolio} onPrepareEnter={prepareEntry} />}
     {portraitFlight && <div className="portrait-flight portrait-frame" aria-hidden="true" style={{ left: portraitFlight.x, top: portraitFlight.y, width: portraitFlight.size, '--portrait-x': `${portraitFlight.targetX}px`, '--portrait-y': `${portraitFlight.targetY}px`, '--portrait-scale': portraitFlight.scale }}><img className="intro-portrait" src="/images/ahmad-zamir.png" alt="" /></div>}
     <div inert={!entered} aria-hidden={!entered}>
     {launch && <div key={launch.id} className="project-launch" aria-hidden="true" onAnimationEnd={event => { if (event.target === event.currentTarget) setLaunch(null) }}>

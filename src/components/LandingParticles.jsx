@@ -1,18 +1,21 @@
 import { useEffect, useRef } from 'react'
-import { createParticleLine, stepParticleLine } from './landingParticleMotion'
+import { createPortal } from 'react-dom'
+import { beginParticleEntry, createParticleLine, stepParticleEntry, stepParticleLine } from './landingParticleMotion'
 import './ParticleBackground.css'
 
 const colors = ['244, 225, 188', '208, 179, 133', '177, 145, 103']
 
-export default function LandingParticles({ paused, targetRef }) {
+export default function LandingParticles({ paused, entering, targetRef }) {
   const canvasRef = useRef(null)
   const pausedRef = useRef(paused)
+  const enteringRef = useRef(entering)
   const syncRef = useRef(null)
 
   useEffect(() => {
     pausedRef.current = paused
+    enteringRef.current = entering
     syncRef.current?.()
-  }, [paused])
+  }, [paused, entering])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -41,7 +44,8 @@ export default function LandingParticles({ paused, targetRef }) {
     let previous = 0
     let lastDraw = 0
     let elapsed = 0
-    const canAnimate = () => !pausedRef.current && !motion.matches && !document.hidden
+    let entryStart = null
+    const canAnimate = () => (!pausedRef.current || enteringRef.current) && !motion.matches && !document.hidden
 
     function draw() {
       context.clearRect(0, 0, width, height)
@@ -59,6 +63,8 @@ export default function LandingParticles({ paused, targetRef }) {
       context.globalAlpha = 1
     }
     function resize() {
+      const oldWidth = width
+      const oldHeight = height
       width = canvas.clientWidth
       height = canvas.clientHeight
       if (!width || !height) return
@@ -69,12 +75,27 @@ export default function LandingParticles({ paused, targetRef }) {
       canvas.width = Math.round(width * ratio)
       canvas.height = Math.round(height * ratio)
       context.setTransform(ratio, 0, 0, ratio, 0, 0)
-      const next = createParticleLine(compact.matches ? 160 : 460, width, height, target)
-      next.forEach((particle, index) => {
-        if (particles[index]) particle.progress = particles[index].progress
-      })
-      particles = next
-      stepParticleLine(particles, 0, elapsed, width, height, target)
+      if (entryStart !== null) {
+        // Keep the same dust during rotation and retarget its remaining flight.
+        for (const particle of particles) {
+          particle.entryX *= width / Math.max(1, oldWidth)
+          particle.entryY *= height / Math.max(1, oldHeight)
+        }
+        stepParticleEntry(particles, (performance.now() - entryStart) / 900, target)
+      } else {
+        const next = createParticleLine(compact.matches ? 160 : 460, width, height, { scattered: !particles.length && !pausedRef.current && !motion.matches })
+        if (particles.length && oldWidth && oldHeight) {
+          next.forEach((particle, index) => {
+            const previous = particles[Math.floor(index * particles.length / next.length)]
+            particle.x = previous.x * width / oldWidth
+            particle.y = previous.y * height / oldHeight
+            particle.vx = previous.vx * width / oldWidth
+            particle.vy = previous.vy * height / oldHeight
+            particle.flight = previous.flight
+          })
+        }
+        particles = next
+      }
       draw()
     }
     function tick(now) {
@@ -84,8 +105,15 @@ export default function LandingParticles({ paused, targetRef }) {
         previous = now
         lastDraw = now
         elapsed += delta
-        stepParticleLine(particles, delta, elapsed, width, height, target)
-        draw()
+        if (entryStart !== null) {
+          const progress = (now - entryStart) / 900
+          stepParticleEntry(particles, progress, target)
+          draw()
+          if (progress >= 1) { frame = 0; return }
+        } else {
+          stepParticleLine(particles, delta, elapsed)
+          draw()
+        }
       }
       frame = window.requestAnimationFrame(tick)
     }
@@ -94,14 +122,18 @@ export default function LandingParticles({ paused, targetRef }) {
       frame = 0
       previous = 0
       lastDraw = 0
+      if (enteringRef.current && entryStart === null) {
+        beginParticleEntry(particles)
+        entryStart = performance.now()
+      }
       if (canAnimate()) frame = window.requestAnimationFrame(tick)
       else if (!document.hidden) draw()
     }
     const observer = new ResizeObserver(resize)
     observer.observe(canvas)
     if (targetRef.current) observer.observe(targetRef.current)
-    const identity = targetRef.current?.parentElement
-    if (identity) observer.observe(identity)
+    const header = targetRef.current?.closest('.site-header')
+    if (header) observer.observe(header)
     resize()
     syncRef.current = sync
     sync()
@@ -119,5 +151,6 @@ export default function LandingParticles({ paused, targetRef }) {
     }
   }, [targetRef])
 
-  return <div className="particle-background landing-particles" aria-hidden="true"><canvas ref={canvasRef} /></div>
+  // Keep the dust above the fading welcome screen in viewport coordinates.
+  return createPortal(<div className="particle-background landing-particles" aria-hidden="true"><canvas ref={canvasRef} /></div>, document.body)
 }
