@@ -5,6 +5,7 @@
   opacity: 1; transition: opacity 520ms ease, transform 520ms ease;
 }
 .welcome-screen.is-leaving { pointer-events: none; animation: welcome-depart 900ms ease both; }
+.welcome-screen.is-leaving .welcome-portrait { visibility: hidden; }
 @keyframes welcome-depart { 0%, 30% { opacity: 1; transform: none; } 100% { opacity: 0; transform: scale(1.035); } }
 .welcome-screen .particle-background { height: 100%; mask-image: none; }
 .welcome-screen .light-ribbon { top: 45%; }

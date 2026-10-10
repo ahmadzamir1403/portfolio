@@ -125,3 +125,12 @@ Keep all three recognizable and same sizes throughout, clean original Japanese a
 - Shield and impact animations inherit pause state and respect reduced motion.
 
 - AT Field moved closer to Eva-02: left 29% of battle frame; shield strike shifted with it to left 46%.
+
+## Horizontal navigation, profile entry, project previews, and scroll audio
+
+- Work, About, Skills, and Contact now occupy horizontal, snapping viewport panels. Mouse wheel advances at panel edges, native horizontal scrolling and touch swipes work, and Left/Right or A/D navigate sections. Tall panels keep their own vertical scrolling. Header links and footer arrows/dots offer direct navigation; URL fragments still open the corresponding section. Project selectors and screenshot galleries retain their own arrow controls.
+- The welcome portrait shrinks and travels into the top-right profile badge during entry. Reduced motion enters immediately. The badge links to About; the introduction no longer duplicates the portrait.
+- Project tiles show a viewport-positioned detail popup on mouse hover or keyboard focus. The popup includes the summary, technologies, and feature details; Escape, scrolling, resizing, selection, and leaving dismiss it. A short exit delay allows moving the pointer onto the popup.
+- Scrolling plays a faint glass clink synthesized with Web Audio: a clear high resonance, a delicate ring, and quickly fading upper tones. Audio initializes only after a user gesture, is rate limited, remains silent in hidden tabs, and has an independent mute control beside the ambience control.
+- Space background progress and horizontal parallax follow the panel track.
+- Validation: production build and lint pass. Mocked hook smoke checks pass for deep links, resize, navigation boundaries, reduced motion, arrow/A/D controls, editing and gallery priority, vertical overflow, wheel inertia, audio activation/volume/throttling/mute/hidden tabs, and listener cleanup. Browser visual and audible QA could not run because no browser is available in this session.

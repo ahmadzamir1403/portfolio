@@ -5,6 +5,10 @@ import ParticleBackground from './components/ParticleBackground'
 import WelcomeScreen from './components/WelcomeScreen'
 import ReactiveName from './components/ReactiveName'
 import ScrollSpace from './components/ScrollSpace'
+import ProjectTooltip from './components/ProjectTooltip'
+import useSideScroll from './components/useSideScroll'
+import useScrollSound from './components/useScrollSound'
+import './components/SideScroll.css'
 
 const linkedin = 'https://www.linkedin.com/in/ahmad-zamir-823105232'
 const email = 'https://mail.google.com/mail/?view=cm&fs=1&to=ahmadzamir1403%40gmail.com'
@@ -57,16 +61,45 @@ export default function App() {
   const launchSequence = useRef(0)
   const [ambiencePaused, setAmbiencePaused] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   const [entered, setEntered] = useState(() => Boolean(window.location.hash))
-  const mainRef = useRef(null)
+  const { trackRef: mainRef, panel, navigate } = useSideScroll(entered)
+  const scrollSound = useScrollSound(entered)
+  const [preview, setPreview] = useState(null)
+  const previewTimer = useRef(null)
+  const profileRef = useRef(null)
+  const [portraitFlight, setPortraitFlight] = useState(null)
+  const flightTimer = useRef(null)
   const featuredArtRef = useRef(null)
   const enteredFromWelcome = useRef(false)
+  const closePreview = useCallback(() => {
+    window.clearTimeout(previewTimer.current)
+    setPreview(null)
+  }, [])
+  function keepPreview() { window.clearTimeout(previewTimer.current) }
+  function leavePreview() {
+    window.clearTimeout(previewTimer.current)
+    previewTimer.current = window.setTimeout(() => setPreview(null), 180)
+  }
+  function showPreview(index) {
+    window.clearTimeout(previewTimer.current)
+    setPreview(index)
+  }
+  const prepareEntry = useCallback(source => {
+    const target = profileRef.current?.getBoundingClientRect()
+    if (!source || !target || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    setPortraitFlight({ x: source.left, y: source.top, size: source.width, targetX: target.left - source.left, targetY: target.top - source.top, scale: target.width / source.width })
+    flightTimer.current = window.setTimeout(() => setPortraitFlight(null), 960)
+  }, [])
+  useEffect(() => () => {
+    window.clearTimeout(previewTimer.current)
+    window.clearTimeout(flightTimer.current)
+  }, [])
   const enterPortfolio = useCallback(() => {
     enteredFromWelcome.current = true
     setEntered(true)
   }, [])
   useEffect(() => {
     if (entered && enteredFromWelcome.current) mainRef.current?.focus({ preventScroll: true })
-  }, [entered])
+  }, [entered, mainRef])
   const tiles = useRef([])
   const project = projects[selected]
   useEffect(() => {
@@ -82,6 +115,7 @@ export default function App() {
     }
   }, [launch])
   function selectProject(index, cinematic = true) {
+    closePreview()
     if (index === selected) return
     setSelected(index)
     setHasSelectedProject(true)
@@ -107,6 +141,7 @@ export default function App() {
     })
   }
   function navigateProjects(event, index) {
+    if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return
     let next
     if (event.key === 'ArrowRight') next = (index + 1) % projects.length
     if (event.key === 'ArrowLeft') next = (index - 1 + projects.length) % projects.length
@@ -119,8 +154,15 @@ export default function App() {
       tiles.current[next]?.scrollIntoView({ block: 'nearest', inline: 'nearest' })
     }
   }
+  function navigateLink(event, index) {
+    event.preventDefault()
+    closePreview()
+    navigate(index)
+    window.history.replaceState(null, '', event.currentTarget.hash)
+  }
   return <>
-    {!entered && <WelcomeScreen paused={ambiencePaused} onToggleMotion={() => setAmbiencePaused(value => !value)} onEnter={enterPortfolio} />}
+    {!entered && <WelcomeScreen paused={ambiencePaused} onToggleMotion={() => setAmbiencePaused(value => !value)} onEnter={enterPortfolio} onPrepareEnter={prepareEntry} />}
+    {portraitFlight && <div className="portrait-flight portrait-frame" aria-hidden="true" style={{ left: portraitFlight.x, top: portraitFlight.y, width: portraitFlight.size, '--portrait-x': `${portraitFlight.targetX}px`, '--portrait-y': `${portraitFlight.targetY}px`, '--portrait-scale': portraitFlight.scale }}><img className="intro-portrait" src="/images/ahmad-zamir.png" alt="" /></div>}
     <div inert={!entered} aria-hidden={!entered}>
     {launch && <div key={launch.id} className="project-launch" aria-hidden="true" onAnimationEnd={event => { if (event.target === event.currentTarget) setLaunch(null) }}>
       <div className="project-launch-tile" style={{ '--launch-x': `${launch.x}px`, '--launch-y': `${launch.y}px`, '--launch-width': `${launch.width}px`, '--launch-height': `${launch.height}px`, '--launch-target-x': `${launch.targetX}px`, '--launch-target-y': `${launch.targetY}px`, '--launch-scale': launch.scale }}>
@@ -129,22 +171,29 @@ export default function App() {
     </div>}
     <a className="skip-link" href="#main">Skip to content</a>
     <div className={`console theme-${project.theme}`} id="top">
-      <ScrollSpace active={entered} paused={ambiencePaused} />
+      <ScrollSpace active={entered} paused={ambiencePaused} trackRef={mainRef} />
       <div className="ambient" aria-hidden="true" />
       <ParticleBackground paused={!entered || ambiencePaused} />
       <header className="site-header shell">
-        <a href="#top" className="brand" aria-label="Ahmad Zamir home">az<span> / </span></a>
-        <nav aria-label="Main navigation"><a className="nav-work" href="#projects">Work</a><a href="#about">About</a><a href="#skills">Skills</a><a href="#contact">Contact</a></nav>
+        <a href="#top" className="brand" aria-label="Ahmad Zamir home" onClick={event => navigateLink(event, 0)}>az<span> / </span></a>
+        <nav aria-label="Main navigation">{['Work', 'About', 'Skills', 'Contact'].map((label, index) => <a key={label} className={panel === index ? 'nav-active' : ''} aria-current={panel === index ? 'page' : undefined} href={`#${['projects', 'about', 'skills', 'contact'][index]}`} onClick={event => navigateLink(event, index)}>{label}</a>)}</nav>
         <div className="header-contact-card">
         <nav className="header-socials" aria-label="Social and contact links"><a href={github} target="_blank" rel="noreferrer">GitHub</a><a href={linkedin} target="_blank" rel="noreferrer">LinkedIn</a><a href={email} target="_blank" rel="noreferrer">Email</a><a href="https://wa.me/60132418482" target="_blank" rel="noreferrer">WhatsApp</a></nav>
         <button className="ambient-toggle" type="button" onClick={() => setAmbiencePaused(value => !value)} aria-label={ambiencePaused ? 'Play background animation' : 'Pause background animation'} title={ambiencePaused ? 'Play background animation' : 'Pause background animation'}>
           <svg viewBox="0 0 12 12" aria-hidden="true">{ambiencePaused ? <path d="M3 1.5 10 6 3 10.5Z" /> : <path d="M2.5 2h2v8h-2zm5 0h2v8h-2z" />}</svg>
         </button>
+        <button className="ambient-toggle sound-toggle" type="button" onClick={scrollSound.toggle} aria-pressed={scrollSound.enabled} aria-label={scrollSound.enabled ? 'Mute scroll sound' : 'Enable scroll sound'} title={scrollSound.enabled ? 'Mute scroll sound' : 'Enable scroll sound'}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4 6 8H3v8h3l5 4Z" />{scrollSound.enabled ? <><path d="M15 8a6 6 0 0 1 0 8" /><path d="M18 5a10 10 0 0 1 0 14" /></> : <path d="m16 9 6 6m0-6-6 6" />}</svg>
+        </button>
         </div>
+        <a className={`header-profile ${portraitFlight ? 'is-arriving' : ''}`} href="#about" onClick={event => navigateLink(event, 1)} aria-label="About Ahmad Zamir">
+          <div ref={profileRef} className="portrait-frame header-portrait"><img className="intro-portrait" src="/images/ahmad-zamir.png" alt="" width="44" height="44" /></div>
+          <span>Ahmad Zamir<span className="profile-caption">View profile</span></span>
+        </a>
       </header>
-      <main id="main" ref={mainRef} tabIndex={-1}>
+      <main id="main" className="portfolio-track" ref={mainRef} tabIndex={-1} data-panel={panel} aria-label="Portfolio sections" onScrollCapture={scrollSound.play}>
+        <div className="portfolio-panel work-panel" aria-label="Selected work">
         <section className="intro shell" aria-labelledby="intro-title">
-          <div className="portrait-frame"><img className="intro-portrait" src="/images/ahmad-zamir.png" alt="Ahmad Zamir" width="160" height="160" fetchPriority="high" /></div>
           <div className="intro-identity">
             <ReactiveName id="intro-title" />
             <p className="intro-description">Computer Science student at UiTM.</p>
@@ -153,7 +202,7 @@ export default function App() {
         <section id="projects" className="work shell" aria-labelledby="work-title">
           <div className="section-heading"><h2 id="work-title">Selected work</h2><span className="section-counter">0{selected + 1} <span>/ 0{projects.length}</span></span></div>
           <div className="project-rail" role="group" aria-label="Choose a featured project">
-            {projects.map((item, index) => <button key={item.id} ref={el => { tiles.current[index] = el }} className={`project-tile ${index === selected ? 'is-selected' : ''}`} aria-pressed={index === selected} aria-controls="project-details" onClick={() => selectProject(index)} onKeyDown={event => navigateProjects(event, index)}>
+            {projects.map((item, index) => <button key={item.id} ref={el => { tiles.current[index] = el }} className={`project-tile ${index === selected ? 'is-selected' : ''}`} aria-pressed={index === selected} aria-controls="project-details" aria-describedby={preview === index ? `preview-${item.id}` : undefined} onPointerEnter={event => { if (event.pointerType === 'mouse') showPreview(index) }} onPointerLeave={leavePreview} onFocus={() => showPreview(index)} onBlur={closePreview} onClick={() => selectProject(index)} onKeyDown={event => { if (event.key === 'Escape') closePreview(); navigateProjects(event, index) }}>
               <ProjectArt project={item} small /><span className="tile-title">{item.title}</span>
             </button>)}
             <a className="all-work" href={github + '?tab=repositories'} target="_blank" rel="noreferrer"><span>More on GitHub</span></a>
@@ -171,10 +220,14 @@ export default function App() {
           <p className="sr-only" role="status">Selected project: {project.title}</p>
           
         </section>
+        </div>
+        <div className="portfolio-panel" aria-label="About">
         <section id="about" className="about shell section-block" aria-labelledby="about-title">
           <div><h2 id="about-title">About me</h2></div>
           <div className="about-copy"><p>I'm Ahmad, a Computer Science student at UiTM interested in data analysis and full-stack development.</p><p>I build web apps and workflow automations, including a résumé screening tool for my final-year project and an internship logbook. I enjoy working with data and building tools that make everyday tasks easier.</p><p>I’m proficient with AI tools for research, coding, and problem-solving, using them to explore ideas and improve my workflow.</p><a className="text-link" href={linkedin} target="_blank" rel="noreferrer">Connect on LinkedIn</a></div>
         </section>
+        </div>
+        <div className="portfolio-panel" aria-label="Skills">
         <section id="skills" className="shell section-block skills" aria-labelledby="skills-title">
           <div className="skills-heading"><h2 id="skills-title">Skills</h2></div>
           <div className="skill-grid">{[
@@ -184,10 +237,23 @@ export default function App() {
             ['04', 'AI tools', 'Research · Coding · Problem-solving', 'Proficient in AI-assisted workflows'],
           ].map(([, title, primary, secondary]) => <article className="skill-card" key={title}><h3>{title}</h3><p>{primary}</p><span>{secondary}</span></article>)}</div>
         </section>
+        </div>
+        <div className="portfolio-panel" aria-label="Contact">
         <section id="contact" className="contact shell section-block" aria-labelledby="contact-title"><div className="contact-panel"><div><h2 id="contact-title">Get in touch</h2><a className="contact-address" href={email} target="_blank" rel="noreferrer">ahmadzamir1403@gmail.com</a></div><div className="contact-actions"><a className="button" href={email} target="_blank" rel="noreferrer">Email me</a><a className="button contact-whatsapp" href="https://wa.me/60132418482" target="_blank" rel="noreferrer">WhatsApp</a></div></div></section>
+        </div>
       </main>
-      <footer className="shell footer"><span>© {new Date().getFullYear()} Ahmad Zamir</span><a href="#top">Back to top</a></footer>
+      <footer className="shell footer side-scroll-footer">
+        <span className="footer-copyright">© {new Date().getFullYear()} Ahmad Zamir</span>
+        <nav className="section-pagination" aria-label="Browse portfolio sections">
+          <button type="button" aria-label="Previous section" disabled={panel === 0} onClick={() => navigate(panel - 1)}>←</button>
+          {['Work', 'About', 'Skills', 'Contact'].map((label, index) => <button type="button" key={label} className={`section-dot ${panel === index ? 'is-active' : ''}`} aria-label={`Go to ${label}`} aria-current={panel === index ? 'step' : undefined} onClick={() => navigate(index)} />)}
+          <button type="button" aria-label="Next section" disabled={panel === 3} onClick={() => navigate(panel + 1)}>→</button>
+        </nav>
+        <span className="scroll-key-hint"><span className="desktop-hint">Scroll or <kbd>←</kbd><kbd>→</kbd> / <kbd>A</kbd><kbd>D</kbd></span><span className="touch-hint">Swipe to explore</span></span>
+      </footer>
+      <p className="sr-only" role="status">Section {panel + 1} of 4: {['Work', 'About', 'Skills', 'Contact'][panel]}</p>
     </div>
+    {entered && preview !== null && <ProjectTooltip key={projects[preview].id} project={projects[preview]} anchorRef={tiles} index={preview} onEnter={keepPreview} onLeave={leavePreview} onClose={closePreview} />}
     </div>
   </>
 }

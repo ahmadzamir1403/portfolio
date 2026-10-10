@@ -4,9 +4,10 @@ import ReactiveName from './ReactiveName'
 import WelcomeSky from './WelcomeSky'
 import './WelcomeScreen.css'
 
-export default function WelcomeScreen({ paused, onToggleMotion, onEnter }) {
+export default function WelcomeScreen({ paused, onToggleMotion, onEnter, onPrepareEnter }) {
   const [leaving, setLeaving] = useState(false)
   const enterRef = useRef(null)
+  const portraitRef = useRef(null)
 
   useEffect(() => {
     const previous = document.body.style.overflow
@@ -24,7 +25,10 @@ export default function WelcomeScreen({ paused, onToggleMotion, onEnter }) {
   function enter() {
     if (leaving) return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) onEnter()
-    else setLeaving(true)
+    else {
+      onPrepareEnter?.(portraitRef.current?.getBoundingClientRect())
+      setLeaving(true)
+    }
   }
 
   return <section className={`welcome-screen ${leaving ? 'is-leaving' : ''}`} aria-label="Welcome to Ahmad Zamir's portfolio">
@@ -33,7 +37,7 @@ export default function WelcomeScreen({ paused, onToggleMotion, onEnter }) {
     <div className="welcome-top"><span className="welcome-brand" aria-hidden="true">az /</span></div>
     <button className="welcome-motion" type="button" onClick={onToggleMotion} aria-label={paused ? 'Play background animation' : 'Pause background animation'}>{paused ? 'Play ambience' : 'Pause ambience'}</button>
     <div className="welcome-identity">
-      <div className="portrait-frame welcome-portrait"><img className="intro-portrait" src="/images/ahmad-zamir.png" alt="Ahmad Zamir" width="160" height="160" fetchPriority="high" /></div>
+      <div ref={portraitRef} className="portrait-frame welcome-portrait"><img className="intro-portrait" src="/images/ahmad-zamir.png" alt="Ahmad Zamir" width="160" height="160" fetchPriority="high" /></div>
       
       
       <ReactiveName onActivate={enter} />

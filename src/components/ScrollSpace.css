@@ -5,10 +5,10 @@
 .scroll-nebula {
   position: absolute; inset: -6%;
   background: radial-gradient(ellipse at 82% 20%, #75604c2e, transparent 55%), radial-gradient(ellipse at 12% 70%, #a1958514, transparent 45%), radial-gradient(ellipse at 90% 85%, #9b794c1f, transparent 42%);
-  transform: translate3d(0, var(--space-drift, 0px), 0);
+  transform: translate3d(var(--space-drift, 0px), 0, 0);
 }
-.scroll-stars { position: absolute; inset: -5% 0; width: 100%; height: 110%; transform: translate3d(0, var(--space-drift, 0px), 0); }
-.scroll-moon { position: absolute; top: 12%; right: 4%; width: clamp(90px, 11vw, 160px); height: auto; opacity: calc(var(--moon-reveal, 0) * .65); transform: translate3d(0, var(--space-drift, 0px), 0); filter: drop-shadow(0 0 20px #ebe9e612); }
+.scroll-stars { position: absolute; inset: -5% -4%; width: 108%; height: 110%; transform: translate3d(var(--space-drift, 0px), 0, 0); }
+.scroll-moon { position: absolute; top: 18%; right: 4%; width: clamp(90px, 11vw, 160px); height: auto; opacity: calc(var(--moon-reveal, 0) * .65); transform: translate3d(var(--space-drift, 0px), 0, 0); filter: drop-shadow(0 0 20px #ebe9e612); }
 .scroll-vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 25%, #11100f55 100%); }
 @media (max-width: 640px) { .scroll-moon { display: none; } .star-secondary { display: none; } }
 @media (prefers-reduced-motion: reduce) { .scroll-nebula, .scroll-stars, .scroll-moon { transform: none; } }
