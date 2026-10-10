@@ -1,10 +1,9 @@
 import { useEffect, useRef, useState } from 'react'
-import LandingParticles from './LandingParticles'
 import ReactiveName from './ReactiveName'
 import WelcomeSky from './WelcomeSky'
 import './WelcomeScreen.css'
 
-export default function WelcomeScreen({ paused, entryTargetRef, onToggleMotion, onEnter, onPrepareEnter }) {
+export default function WelcomeScreen({ paused, onToggleMotion, onEnter, onPrepareEnter }) {
   const [leaving, setLeaving] = useState(false)
   const enterRef = useRef(null)
   const portraitRef = useRef(null)
@@ -32,7 +31,6 @@ export default function WelcomeScreen({ paused, entryTargetRef, onToggleMotion, 
   }
 
   return <section className={`welcome-screen ${leaving ? 'is-leaving' : ''}`} aria-label="Welcome to Ahmad Zamir's portfolio">
-    <LandingParticles paused={paused} entering={leaving} targetRef={entryTargetRef} />
     <WelcomeSky paused={paused || leaving} />
     <div className="welcome-top"><span className="welcome-brand" aria-hidden="true">az /</span></div>
     <button className="welcome-motion" type="button" onClick={onToggleMotion} aria-label={paused ? 'Play background animation' : 'Pause background animation'}>{paused ? 'Play ambience' : 'Pause ambience'}</button>

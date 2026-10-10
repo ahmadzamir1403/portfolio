@@ -1,4 +1,6 @@
 // A broad, gently curved stream of fine, sharply defined dust.
+export const ENTRY_PARTICLE_DURATION = 1600
+
 function streamY(x, width, height, spread) {
   const along = x / Math.max(1, width)
   return height * (.82 - along * .38 - Math.sin(along * Math.PI * 2) * .1) + spread
@@ -35,26 +37,41 @@ export function createParticleLine(count, width, height, { scattered = false } =
   return particles
 }
 
-export function beginParticleEntry(particles) {
-  for (const particle of particles) {
+export function beginParticleEntry(particles, width, height) {
+  particles.forEach((particle, index) => {
     particle.entryX = particle.x
     particle.entryY = particle.y
     particle.entryOpacity = particle.opacity
-  }
+    const distance = Math.min(width * .32, height * .25, 70 + particle.depth * 180)
+    particle.scatterX = Math.max(3, Math.min(width - 3, particle.x + Math.cos(particle.phase) * distance))
+    particle.scatterY = Math.max(3, Math.min(height - 3, particle.y + Math.sin(particle.phase) * distance))
+    particle.ringAngle = index / particles.length * Math.PI * 2
+  })
 }
 
-// On entry, gather the existing stream into the small header portrait.
+// Burst apart first, then curl into a visible ring around the header portrait.
 export function stepParticleEntry(particles, progress, target) {
   for (const particle of particles) {
-    const delay = particle.depth * .16
-    const t = Math.max(0, Math.min(1, (progress - delay) / (1 - delay)))
+    const fade = progress >= 1 ? 1 : Math.max(0, Math.min(1, (progress - .9) / .1))
+    particle.opacity = particle.entryOpacity * (1 - fade)
+    if (progress < .22) {
+      const t = Math.max(0, progress / .22)
+      const eased = 1 - (1 - t) ** 3
+      particle.x = particle.entryX + (particle.scatterX - particle.entryX) * eased
+      particle.y = particle.entryY + (particle.scatterY - particle.entryY) * eased
+      continue
+    }
+    const delay = particle.depth * .06
+    const t = Math.max(0, Math.min(1, (progress - .22 - delay) / (.52 - delay)))
     const eased = t * t * (3 - 2 * t)
     const u = 1 - eased
-    const controlX = particle.entryX + (target.x - particle.entryX) * .28 + Math.sin(particle.phase) * 60
-    const controlY = particle.entryY + (target.y - particle.entryY) * .72 + Math.cos(particle.phase) * 45
-    particle.x = u * u * particle.entryX + 2 * u * eased * controlX + eased * eased * target.x
-    particle.y = u * u * particle.entryY + 2 * u * eased * controlY + eased * eased * target.y
-    particle.opacity = particle.entryOpacity * Math.min(1, (1 - eased) * 8)
+    const angle = particle.ringAngle + u * Math.PI * .8
+    const ringX = target.x + Math.cos(angle) * target.radius
+    const ringY = target.y + Math.sin(angle) * target.radius
+    const controlX = particle.scatterX + (ringX - particle.scatterX) * .28 + Math.sin(particle.phase) * 60
+    const controlY = particle.scatterY + (ringY - particle.scatterY) * .72 + Math.cos(particle.phase) * 45
+    particle.x = u * u * particle.scatterX + 2 * u * eased * controlX + eased * eased * ringX
+    particle.y = u * u * particle.scatterY + 2 * u * eased * controlY + eased * eased * ringY
   }
 }
 

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { beginParticleEntry, createParticleLine, stepParticleEntry, stepParticleLine } from './landingParticleMotion'
+import { beginParticleEntry, createParticleLine, ENTRY_PARTICLE_DURATION, stepParticleEntry, stepParticleLine } from './landingParticleMotion'
 import './ParticleBackground.css'
 
 const colors = ['244, 225, 188', '208, 179, 133', '177, 145, 103']
@@ -36,7 +36,7 @@ export default function LandingParticles({ paused, entering, targetRef }) {
     })
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
     const compact = window.matchMedia('(max-width: 640px), (pointer: coarse)')
-    let target = { x: 0, y: 0 }
+    let target = { x: 0, y: 0, radius: 26 }
     let particles = []
     let width = 0
     let height = 0
@@ -70,7 +70,7 @@ export default function LandingParticles({ paused, entering, targetRef }) {
       if (!width || !height) return
       const bounds = canvas.getBoundingClientRect()
       const portrait = targetRef.current?.getBoundingClientRect()
-      target = portrait ? { x: portrait.left + portrait.width / 2 - bounds.left, y: portrait.top + portrait.height / 2 - bounds.top } : { x: width / 2, y: height * .35 }
+      target = portrait ? { x: portrait.left + portrait.width / 2 - bounds.left, y: portrait.top + portrait.height / 2 - bounds.top, radius: portrait.width / 2 + 4 } : { x: width / 2, y: height * .35, radius: 26 }
       const ratio = Math.min(window.devicePixelRatio || 1, compact.matches ? 1 : 1.5)
       canvas.width = Math.round(width * ratio)
       canvas.height = Math.round(height * ratio)
@@ -80,8 +80,10 @@ export default function LandingParticles({ paused, entering, targetRef }) {
         for (const particle of particles) {
           particle.entryX *= width / Math.max(1, oldWidth)
           particle.entryY *= height / Math.max(1, oldHeight)
+          particle.scatterX *= width / Math.max(1, oldWidth)
+          particle.scatterY *= height / Math.max(1, oldHeight)
         }
-        stepParticleEntry(particles, (performance.now() - entryStart) / 900, target)
+        stepParticleEntry(particles, (performance.now() - entryStart) / ENTRY_PARTICLE_DURATION, target)
       } else {
         const next = createParticleLine(compact.matches ? 160 : 460, width, height, { scattered: !particles.length && !pausedRef.current && !motion.matches })
         if (particles.length && oldWidth && oldHeight) {
@@ -106,7 +108,7 @@ export default function LandingParticles({ paused, entering, targetRef }) {
         lastDraw = now
         elapsed += delta
         if (entryStart !== null) {
-          const progress = (now - entryStart) / 900
+          const progress = (now - entryStart) / ENTRY_PARTICLE_DURATION
           stepParticleEntry(particles, progress, target)
           draw()
           if (progress >= 1) { frame = 0; return }
@@ -123,7 +125,7 @@ export default function LandingParticles({ paused, entering, targetRef }) {
       previous = 0
       lastDraw = 0
       if (enteringRef.current && entryStart === null) {
-        beginParticleEntry(particles)
+        beginParticleEntry(particles, width, height)
         entryStart = performance.now()
       }
       if (canAnimate()) frame = window.requestAnimationFrame(tick)

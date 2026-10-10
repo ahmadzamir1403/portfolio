@@ -3,11 +3,13 @@ import { github, projects } from './data/projects'
 import './App.css'
 import ParticleBackground from './components/ParticleBackground'
 import WelcomeScreen from './components/WelcomeScreen'
+import LandingParticles from './components/LandingParticles'
+import { ENTRY_PARTICLE_DURATION } from './components/landingParticleMotion'
 import ReactiveName from './components/ReactiveName'
 import ScrollSpace from './components/ScrollSpace'
 import ProjectTooltip from './components/ProjectTooltip'
 import useSideScroll from './components/useSideScroll'
-import useScrollSound from './components/useScrollSound'
+import useClickSound from './components/useClickSound'
 import './components/SideScroll.css'
 
 const linkedin = 'https://www.linkedin.com/in/ahmad-zamir-823105232'
@@ -62,11 +64,13 @@ export default function App() {
   const [ambiencePaused, setAmbiencePaused] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   const [entered, setEntered] = useState(() => Boolean(window.location.hash))
   const { trackRef: mainRef, panel, navigate } = useSideScroll(entered)
-  const scrollSound = useScrollSound(entered)
+  const clickSound = useClickSound()
   const [preview, setPreview] = useState(null)
   const previewTimer = useRef(null)
   const profileRef = useRef(null)
   const [portraitFlight, setPortraitFlight] = useState(null)
+  const [entryParticles, setEntryParticles] = useState(false)
+  const particleTimer = useRef(null)
   const flightTimer = useRef(null)
   const featuredArtRef = useRef(null)
   const enteredFromWelcome = useRef(false)
@@ -87,11 +91,14 @@ export default function App() {
     const target = profileRef.current?.getBoundingClientRect()
     if (!source || !target || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     setPortraitFlight({ x: source.left, y: source.top, size: source.width, targetX: target.left - source.left, targetY: target.top - source.top, scale: target.width / source.width })
+    setEntryParticles(true)
+    particleTimer.current = window.setTimeout(() => setEntryParticles(false), ENTRY_PARTICLE_DURATION + 80)
     flightTimer.current = window.setTimeout(() => setPortraitFlight(null), 960)
   }, [])
   useEffect(() => () => {
     window.clearTimeout(previewTimer.current)
     window.clearTimeout(flightTimer.current)
+    window.clearTimeout(particleTimer.current)
   }, [])
   const enterPortfolio = useCallback(() => {
     enteredFromWelcome.current = true
@@ -161,7 +168,8 @@ export default function App() {
     window.history.replaceState(null, '', event.currentTarget.hash)
   }
   return <>
-    {!entered && <WelcomeScreen paused={ambiencePaused} entryTargetRef={profileRef} onToggleMotion={() => setAmbiencePaused(value => !value)} onEnter={enterPortfolio} onPrepareEnter={prepareEntry} />}
+    {!entered && <WelcomeScreen paused={ambiencePaused} onToggleMotion={() => setAmbiencePaused(value => !value)} onEnter={enterPortfolio} onPrepareEnter={prepareEntry} />}
+    {(!entered || entryParticles) && <LandingParticles paused={ambiencePaused} entering={entryParticles} targetRef={profileRef} />}
     {portraitFlight && <div className="portrait-flight portrait-frame" aria-hidden="true" style={{ left: portraitFlight.x, top: portraitFlight.y, width: portraitFlight.size, '--portrait-x': `${portraitFlight.targetX}px`, '--portrait-y': `${portraitFlight.targetY}px`, '--portrait-scale': portraitFlight.scale }}><img className="intro-portrait" src="/images/ahmad-zamir.png" alt="" /></div>}
     <div inert={!entered} aria-hidden={!entered}>
     {launch && <div key={launch.id} className="project-launch" aria-hidden="true" onAnimationEnd={event => { if (event.target === event.currentTarget) setLaunch(null) }}>
@@ -182,8 +190,8 @@ export default function App() {
         <button className="ambient-toggle" type="button" onClick={() => setAmbiencePaused(value => !value)} aria-label={ambiencePaused ? 'Play background animation' : 'Pause background animation'} title={ambiencePaused ? 'Play background animation' : 'Pause background animation'}>
           <svg viewBox="0 0 12 12" aria-hidden="true">{ambiencePaused ? <path d="M3 1.5 10 6 3 10.5Z" /> : <path d="M2.5 2h2v8h-2zm5 0h2v8h-2z" />}</svg>
         </button>
-        <button className="ambient-toggle sound-toggle" type="button" onClick={scrollSound.toggle} aria-pressed={scrollSound.enabled} aria-label={scrollSound.enabled ? 'Mute scroll sound' : 'Enable scroll sound'} title={scrollSound.enabled ? 'Mute scroll sound' : 'Enable scroll sound'}>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4 6 8H3v8h3l5 4Z" />{scrollSound.enabled ? <><path d="M15 8a6 6 0 0 1 0 8" /><path d="M18 5a10 10 0 0 1 0 14" /></> : <path d="m16 9 6 6m0-6-6 6" />}</svg>
+        <button className="ambient-toggle sound-toggle" type="button" onClick={clickSound.toggle} aria-pressed={clickSound.enabled} aria-label={clickSound.enabled ? 'Mute click sound' : 'Enable click sound'} title={clickSound.enabled ? 'Mute click sound' : 'Enable click sound'}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4 6 8H3v8h3l5 4Z" />{clickSound.enabled ? <><path d="M15 8a6 6 0 0 1 0 8" /><path d="M18 5a10 10 0 0 1 0 14" /></> : <path d="m16 9 6 6m0-6-6 6" />}</svg>
         </button>
         </div>
         <a className={`header-profile ${portraitFlight ? 'is-arriving' : ''}`} href="#about" onClick={event => navigateLink(event, 1)} aria-label="About Ahmad Zamir">
@@ -191,7 +199,7 @@ export default function App() {
           <span>Ahmad Zamir<span className="profile-caption">View profile</span></span>
         </a>
       </header>
-      <main id="main" className="portfolio-track" ref={mainRef} tabIndex={-1} data-panel={panel} aria-label="Portfolio sections" onScrollCapture={scrollSound.play}>
+      <main id="main" className="portfolio-track" ref={mainRef} tabIndex={-1} data-panel={panel} aria-label="Portfolio sections">
         <div className="portfolio-panel work-panel" aria-label="Selected work">
         <section className="intro shell" aria-labelledby="intro-title">
           <div className="intro-identity">
