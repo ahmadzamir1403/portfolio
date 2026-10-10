@@ -19,7 +19,7 @@ export function createParticleLine(count, width, height, { scattered = false } =
     const scale = Math.max(.85, Math.min(1, width / 738))
     return { homeX, homeY, x: homeX, y: homeY, vx: 0, vy: 0,
       lineWidth: width, lineHeight: height, spreadY, speed: 24 + depth * 36,
-      radius: (.4 + depth * .75) * scale, depth, phase: random() * Math.PI * 2,
+      radius: (.65 + depth ** 2 * 1.45) * scale, depth, phase: random() * Math.PI * 2,
       spread: random(), flight: 0 }
   })
   if (scattered) {

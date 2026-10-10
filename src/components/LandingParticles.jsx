@@ -2,6 +2,8 @@ import { useEffect, useRef } from 'react'
 import { createParticleLine, scatterParticleLine, stepParticleLine } from './landingParticleMotion'
 import './ParticleBackground.css'
 
+const colors = ['244, 225, 188', '208, 179, 133', '177, 145, 103']
+
 export default function LandingParticles({ paused }) {
   const canvasRef = useRef(null)
   const pausedRef = useRef(paused)
@@ -16,6 +18,19 @@ export default function LandingParticles({ paused }) {
     const canvas = canvasRef.current
     const context = canvas.getContext('2d', { alpha: true })
     if (!context) return
+    // Reuse small glow textures instead of rebuilding gradients every frame.
+    const glows = colors.map(color => {
+      const sprite = document.createElement('canvas')
+      sprite.width = sprite.height = 64
+      const glowContext = sprite.getContext('2d')
+      const gradient = glowContext.createRadialGradient(32, 32, 0, 32, 32, 32)
+      gradient.addColorStop(0, `rgba(${color},.4)`)
+      gradient.addColorStop(.4, `rgba(${color},.12)`)
+      gradient.addColorStop(1, `rgba(${color},0)`)
+      glowContext.fillStyle = gradient
+      glowContext.fillRect(0, 0, 64, 64)
+      return sprite
+    })
     const screen = canvas.closest('.welcome-screen')
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
     let particles = []
@@ -41,12 +56,16 @@ export default function LandingParticles({ paused }) {
       context.clearRect(0, 0, width, height)
       for (const particle of particles) {
         const opacity = (.24 + particle.depth * .5) * (.8 + Math.sin(elapsed * .6 + particle.phase) * .2)
-        const color = particle.depth > .96 ? '244, 225, 188' : particle.depth > .65 ? '208, 179, 133' : '177, 145, 103'
-        context.fillStyle = 'rgba(' + color + ',' + opacity + ')'
+        const colorIndex = particle.depth > .96 ? 0 : particle.depth > .65 ? 1 : 2
+        const glowRadius = particle.radius * 3.5
+        context.globalAlpha = opacity
+        context.drawImage(glows[colorIndex], particle.x - glowRadius, particle.y - glowRadius, glowRadius * 2, glowRadius * 2)
+        context.fillStyle = `rgb(${colors[colorIndex]})`
         context.beginPath()
         context.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2)
         context.fill()
       }
+      context.globalAlpha = 1
     }
     function resize() {
       const oldWidth = width
@@ -58,7 +77,7 @@ export default function LandingParticles({ paused }) {
       canvas.width = Math.round(width * ratio)
       canvas.height = Math.round(height * ratio)
       context.setTransform(ratio, 0, 0, ratio, 0, 0)
-      const next = createParticleLine(width < 640 ? 230 : 420, width, height, { scattered: !particles.length && !pausedRef.current && !motion.matches })
+      const next = createParticleLine(width < 640 ? 400 : 780, width, height, { scattered: !particles.length && !pausedRef.current && !motion.matches })
       if (particles.length && oldWidth && oldHeight) {
         // Keep the entrance in progress when layout or device orientation changes.
         next.forEach((particle, index) => {
