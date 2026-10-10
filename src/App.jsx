@@ -9,7 +9,6 @@ import ReactiveName from './components/ReactiveName'
 import ScrollSpace from './components/ScrollSpace'
 import ProjectTooltip from './components/ProjectTooltip'
 import useSideScroll from './components/useSideScroll'
-import useClickSound from './components/useClickSound'
 import './components/SideScroll.css'
 import './Atmosphere.css'
 
@@ -65,7 +64,6 @@ export default function App() {
   const [ambiencePaused, setAmbiencePaused] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   const [entered, setEntered] = useState(() => Boolean(window.location.hash))
   const { trackRef: mainRef, panel, navigate } = useSideScroll(entered)
-  const clickSound = useClickSound()
   const [preview, setPreview] = useState(null)
   const previewTimer = useRef(null)
   const profileRef = useRef(null)
@@ -213,12 +211,6 @@ export default function App() {
         <nav aria-label="Main navigation">{['Work', 'About', 'Skills', 'Contact'].map((label, index) => <a key={label} className={panel === index ? 'nav-active' : ''} aria-current={panel === index ? 'page' : undefined} href={`#${['projects', 'about', 'skills', 'contact'][index]}`} onClick={event => navigateLink(event, index)}>{label}</a>)}</nav>
         <div className="header-contact-card">
         <nav className="header-socials" aria-label="Social and contact links"><a href={github} target="_blank" rel="noreferrer">GitHub</a><a href={linkedin} target="_blank" rel="noreferrer">LinkedIn</a><a href={email} target="_blank" rel="noreferrer">Email</a><a href="https://wa.me/60132418482" target="_blank" rel="noreferrer">WhatsApp</a></nav>
-        <button className="ambient-toggle" type="button" onClick={() => setAmbiencePaused(value => !value)} aria-label={ambiencePaused ? 'Play background animation' : 'Pause background animation'} title={ambiencePaused ? 'Play background animation' : 'Pause background animation'}>
-          <svg viewBox="0 0 12 12" aria-hidden="true">{ambiencePaused ? <path d="M3 1.5 10 6 3 10.5Z" /> : <path d="M2.5 2h2v8h-2zm5 0h2v8h-2z" />}</svg>
-        </button>
-        <button className="ambient-toggle sound-toggle" type="button" onClick={clickSound.toggle} aria-pressed={clickSound.enabled} aria-label={clickSound.enabled ? 'Mute click sound' : 'Enable click sound'} title={clickSound.enabled ? 'Mute click sound' : 'Enable click sound'}>
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 4 6 8H3v8h3l5 4Z" />{clickSound.enabled ? <><path d="M15 8a6 6 0 0 1 0 8" /><path d="M18 5a10 10 0 0 1 0 14" /></> : <path d="m16 9 6 6m0-6-6 6" />}</svg>
-        </button>
         </div>
         <a className={`header-profile ${portraitFlight ? 'is-arriving' : ''}`} href="#about" onClick={event => navigateLink(event, 1)} aria-label="About Ahmad Zamir">
           <div ref={profileRef} className="portrait-frame header-portrait"><img className="intro-portrait" src="/images/ahmad-zamir.png" alt="" width="44" height="44" /></div>
@@ -288,7 +280,6 @@ export default function App() {
           {['Work', 'About', 'Skills', 'Contact'].map((label, index) => <button type="button" key={label} className={`section-dot ${panel === index ? 'is-active' : ''}`} aria-label={`Go to ${label}`} aria-current={panel === index ? 'step' : undefined} onClick={() => navigate(index)} />)}
           <button type="button" aria-label="Next section" disabled={panel === 3} onClick={() => navigate(panel + 1)}>→</button>
         </nav>
-        <span className="scroll-key-hint"><span className="desktop-hint">Scroll or <kbd>←</kbd><kbd>→</kbd> / <kbd>A</kbd><kbd>D</kbd></span><span className="touch-hint">Swipe to explore</span></span>
       </footer>
       <p className="sr-only" role="status">Section {panel + 1} of 4: {['Work', 'About', 'Skills', 'Contact'][panel]}</p>
     </div>
