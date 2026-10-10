@@ -4,6 +4,13 @@ import './ParticleBackground.css'
 
 export default function LandingParticles({ paused }) {
   const canvasRef = useRef(null)
+  const pausedRef = useRef(paused)
+  const syncRef = useRef(null)
+
+  useEffect(() => {
+    pausedRef.current = paused
+    syncRef.current?.()
+  }, [paused])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -18,7 +25,17 @@ export default function LandingParticles({ paused }) {
     let previous = 0
     let lastDraw = 0
     let elapsed = 0
-    const canAnimate = () => !paused && !motion.matches && !document.hidden
+    const canAnimate = () => !pausedRef.current && !motion.matches && !document.hidden
+
+    function settle() {
+      for (const particle of particles) {
+        particle.x = particle.homeX
+        particle.y = particle.homeY
+        particle.vx = 0
+        particle.vy = 0
+        particle.flight = 0
+      }
+    }
 
     function draw() {
       context.clearRect(0, 0, width, height)
@@ -44,13 +61,29 @@ export default function LandingParticles({ paused }) {
       }
     }
     function resize() {
+      const oldWidth = width
+      const oldHeight = height
       width = canvas.clientWidth
       height = canvas.clientHeight
+      if (!width || !height) return
       const ratio = Math.min(window.devicePixelRatio || 1, 1.5)
       canvas.width = Math.round(width * ratio)
       canvas.height = Math.round(height * ratio)
       context.setTransform(ratio, 0, 0, ratio, 0, 0)
-      particles = createParticleLine(width < 640 ? 230 : 420, width, height)
+      const next = createParticleLine(width < 640 ? 230 : 420, width, height, { scattered: !particles.length && !pausedRef.current && !motion.matches })
+      if (particles.length && oldWidth && oldHeight) {
+        // Keep the entrance in progress when layout or device orientation changes.
+        next.forEach((particle, index) => {
+          const previous = particles[Math.floor(index * particles.length / next.length)]
+          particle.x = previous.x * width / oldWidth
+          particle.y = previous.y * height / oldHeight
+          particle.vx = previous.vx * width / oldWidth
+          particle.vy = previous.vy * height / oldHeight
+          particle.flight = previous.flight
+        })
+      }
+      particles = next
+      if (motion.matches) settle()
       draw()
     }
     function tick(now) {
@@ -76,24 +109,27 @@ export default function LandingParticles({ paused }) {
       frame = 0
       previous = 0
       lastDraw = 0
+      if (motion.matches) settle()
       if (canAnimate()) frame = window.requestAnimationFrame(tick)
       else if (!document.hidden) draw()
     }
     const observer = new ResizeObserver(resize)
     observer.observe(canvas)
     resize()
+    syncRef.current = sync
     sync()
     screen.addEventListener('click', scatter)
     document.addEventListener('visibilitychange', sync)
     motion.addEventListener('change', sync)
     return () => {
       window.cancelAnimationFrame(frame)
+      syncRef.current = null
       observer.disconnect()
       screen.removeEventListener('click', scatter)
       document.removeEventListener('visibilitychange', sync)
       motion.removeEventListener('change', sync)
     }
-  }, [paused])
+  }, [])
 
   return <div className="particle-background landing-particles" aria-hidden="true"><canvas ref={canvasRef} /></div>
 }

@@ -134,3 +134,9 @@ Keep all three recognizable and same sizes throughout, clean original Japanese a
 - Scrolling plays a faint glass clink synthesized with Web Audio: a clear high resonance, a delicate ring, and quickly fading upper tones. Audio initializes only after a user gesture, is rate limited, remains silent in hidden tabs, and has an independent mute control beside the ambience control.
 - Space background progress and horizontal parallax follow the panel track.
 - Validation: production build and lint pass. Mocked hook smoke checks pass for deep links, resize, navigation boundaries, reduced motion, arrow/A/D controls, editing and gallery priority, vertical overflow, wheel inertia, audio activation/volume/throttling/mute/hidden tabs, and listener cleanup. Browser visual and audible QA could not run because no browser is available in this session.
+
+## Landing particle entrance
+
+- Each fresh landing-screen mount starts the dust scattered across the viewport, then gently gathers it into the existing curved stream over roughly three seconds. Attraction begins with a short stagger; the normal ambient drift and click scattering remain.
+- Pause/resume keeps the current particle positions. Resizing preserves positions and velocities relative to the viewport rather than restarting the entrance. Reduced motion shows the aligned stream immediately.
+- Validation: lint and production build pass. Desktop (1440 × 900) and mobile (390 × 844) motion checks confirm broad initial scattering, convergence within three seconds, finite positions, and click scatter/return. Browser visual QA remains unavailable in this session.

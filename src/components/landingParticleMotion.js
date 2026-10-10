@@ -1,11 +1,11 @@
 // A broad, gently curved stream with fine dust and soft foreground bokeh.
-export function createParticleLine(count, width, height) {
+export function createParticleLine(count, width, height, { scattered = false } = {}) {
   let seed = 721
   const random = () => {
     seed = seed * 16807 % 2147483647
     return (seed - 1) / 2147483646
   }
-  return Array.from({ length: count }, (_, index) => {
+  const particles = Array.from({ length: count }, (_, index) => {
     const depth = random()
     const along = (index + random()) / count
     const homeX = along * width
@@ -16,6 +16,15 @@ export function createParticleLine(count, width, height) {
       radius: (.45 + depth ** 5 * 5.5) * scale, depth, phase: random() * Math.PI * 2,
       spread: random(), flight: 0 }
   })
+  if (scattered) {
+    for (const particle of particles) {
+      particle.x = random() * width
+      particle.y = random() * height
+      // Stagger the attraction slightly, then let the existing spring gather the dust.
+      particle.flight = .15 + random() * .3
+    }
+  }
+  return particles
 }
 
 export function scatterParticleLine(particles, x, y) {
