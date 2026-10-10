@@ -1,4 +1,4 @@
-// A broad, gently curved stream with fine dust and soft foreground bokeh.
+// A broad, gently curved stream of fine, sharply defined dust.
 function streamY(x, width, height, spread) {
   const along = x / Math.max(1, width)
   return height * (.82 - along * .38 - Math.sin(along * Math.PI * 2) * .1) + spread
@@ -16,10 +16,10 @@ export function createParticleLine(count, width, height, { scattered = false } =
     const homeX = along * width
     const spreadY = (random() + random() + random() - 1.5) * height * .14
     const homeY = streamY(homeX, width, height, spreadY)
-    const scale = Math.max(.75, Math.min(1.45, width / 738))
+    const scale = Math.max(.85, Math.min(1, width / 738))
     return { homeX, homeY, x: homeX, y: homeY, vx: 0, vy: 0,
       lineWidth: width, lineHeight: height, spreadY, speed: 24 + depth * 36,
-      radius: (.45 + depth ** 5 * 5.5) * scale, depth, phase: random() * Math.PI * 2,
+      radius: (.4 + depth * .75) * scale, depth, phase: random() * Math.PI * 2,
       spread: random(), flight: 0 }
   })
   if (scattered) {
