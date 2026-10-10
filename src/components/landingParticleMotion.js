@@ -1,4 +1,9 @@
 // A broad, gently curved stream with fine dust and soft foreground bokeh.
+function streamY(x, width, height, spread) {
+  const along = x / Math.max(1, width)
+  return height * (.82 - along * .38 - Math.sin(along * Math.PI * 2) * .1) + spread
+}
+
 export function createParticleLine(count, width, height, { scattered = false } = {}) {
   let seed = 721
   const random = () => {
@@ -10,9 +15,10 @@ export function createParticleLine(count, width, height, { scattered = false } =
     const along = (index + random()) / count
     const homeX = along * width
     const spreadY = (random() + random() + random() - 1.5) * height * .14
-    const homeY = height * (.82 - along * .38 - Math.sin(along * Math.PI * 2) * .1) + spreadY
+    const homeY = streamY(homeX, width, height, spreadY)
     const scale = Math.max(.75, Math.min(1.45, width / 738))
     return { homeX, homeY, x: homeX, y: homeY, vx: 0, vy: 0,
+      lineWidth: width, lineHeight: height, spreadY, speed: 24 + depth * 36,
       radius: (.45 + depth ** 5 * 5.5) * scale, depth, phase: random() * Math.PI * 2,
       spread: random(), flight: 0 }
   })
@@ -20,8 +26,10 @@ export function createParticleLine(count, width, height, { scattered = false } =
     for (const particle of particles) {
       particle.x = random() * width
       particle.y = random() * height
+      particle.vx = (random() - .5) * 80
+      particle.vy = (random() - .5) * 50
       // Stagger the attraction slightly, then let the existing spring gather the dust.
-      particle.flight = .15 + random() * .3
+      particle.flight = .08 + random() * .16
     }
   }
   return particles
@@ -38,10 +46,23 @@ export function scatterParticleLine(particles, x, y) {
 }
 
 export function stepParticleLine(particles, delta, time) {
+  const flow = Math.max(0, Math.min(1, time - 2))
   for (const particle of particles) {
     particle.flight = Math.max(0, particle.flight - delta)
     const returning = particle.flight === 0
-    const homeY = particle.homeY + Math.sin(time * .55 + particle.phase) * 3
+    // After gathering, transport the dust along the entire curve rather than parking it.
+    particle.homeX += particle.speed * flow * delta
+    const wrapped = particle.homeX > particle.lineWidth + 48
+    if (wrapped) particle.homeX = -48
+    particle.homeY = streamY(particle.homeX, particle.lineWidth, particle.lineHeight, particle.spreadY)
+    const homeY = particle.homeY + Math.sin(time * .9 + particle.phase) * (10 + particle.depth * 10)
+    if (wrapped && returning) {
+      // Recycle beyond the edges so individual particles never jump across the screen.
+      particle.x = particle.homeX
+      particle.y = homeY
+      particle.vx = particle.speed
+      particle.vy = 0
+    }
     if (returning) {
       particle.vx += (particle.homeX - particle.x) * 9 * delta
       particle.vy += (homeY - particle.y) * 9 * delta

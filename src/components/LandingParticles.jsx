@@ -40,8 +40,8 @@ export default function LandingParticles({ paused }) {
     function draw() {
       context.clearRect(0, 0, width, height)
       for (const particle of particles) {
-        const opacity = (.1 + particle.depth * .38) * (.8 + Math.sin(elapsed * .6 + particle.phase) * .2)
-        const color = particle.depth > .96 ? '239, 215, 164' : particle.depth > .65 ? '183, 143, 88' : '139, 111, 76'
+        const opacity = (.18 + particle.depth * .45) * (.8 + Math.sin(elapsed * .6 + particle.phase) * .2)
+        const color = particle.depth > .96 ? '244, 225, 188' : particle.depth > .65 ? '208, 179, 133' : '177, 145, 103'
         if (particle.depth > .82) {
           const radius = particle.radius * 1.6
           const bokeh = context.createRadialGradient(particle.x, particle.y, 0, particle.x, particle.y, radius)
@@ -75,6 +75,10 @@ export default function LandingParticles({ paused }) {
         // Keep the entrance in progress when layout or device orientation changes.
         next.forEach((particle, index) => {
           const previous = particles[Math.floor(index * particles.length / next.length)]
+          particle.homeX = previous.homeX * width / oldWidth
+          particle.homeY = previous.homeY * height / oldHeight
+          particle.spreadY = previous.spreadY * height / oldHeight
+          particle.phase = previous.phase
           particle.x = previous.x * width / oldWidth
           particle.y = previous.y * height / oldHeight
           particle.vx = previous.vx * width / oldWidth

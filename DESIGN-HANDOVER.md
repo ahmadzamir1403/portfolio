@@ -137,6 +137,6 @@ Keep all three recognizable and same sizes throughout, clean original Japanese a
 
 ## Landing particle entrance
 
-- Each fresh landing-screen mount starts the dust scattered across the viewport, then gently gathers it into the existing curved stream over roughly three seconds. Attraction begins with a short stagger; the normal ambient drift and click scattering remain.
+- Each fresh landing-screen mount starts the dust scattered across the viewport with immediate drift, then gathers it into the curved stream over roughly three seconds. After gathering, particles continuously travel along the curve at varying speeds with visible vertical drift. Particles recycle outside the viewport edges. Warmer, brighter dust makes the movement easier to see; click scattering remains.
 - Pause/resume keeps the current particle positions. Resizing preserves positions and velocities relative to the viewport rather than restarting the entrance. Reduced motion shows the aligned stream immediately.
-- Validation: lint and production build pass. Desktop (1440 × 900) and mobile (390 × 844) motion checks confirm broad initial scattering, convergence within three seconds, finite positions, and click scatter/return. Browser visual QA remains unavailable in this session.
+- Validation: lint and production build pass. Desktop (1440 × 900) and mobile (390 × 844) motion checks confirm initial scattering and gathering, roughly 70 pixels of continued movement over two seconds, finite positions through a minute of flow, recycling beyond the visible edges, and click scatter/return. Browser visual QA remains unavailable in this session.
