@@ -5,17 +5,19 @@ import './ParticleBackground.css'
 
 const colors = ['244, 225, 188', '208, 179, 133', '177, 145, 103']
 
-export default function LandingParticles({ paused, entering, targetRef }) {
+export default function LandingParticles({ paused, entering, returning, targetRef }) {
   const canvasRef = useRef(null)
   const pausedRef = useRef(paused)
   const enteringRef = useRef(entering)
+  const returningRef = useRef(returning)
   const syncRef = useRef(null)
 
   useEffect(() => {
     pausedRef.current = paused
     enteringRef.current = entering
+    returningRef.current = returning
     syncRef.current?.()
-  }, [paused, entering])
+  }, [paused, entering, returning])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -45,7 +47,10 @@ export default function LandingParticles({ paused, entering, targetRef }) {
     let lastDraw = 0
     let elapsed = 0
     let entryStart = null
-    const canAnimate = () => (!pausedRef.current || enteringRef.current) && !motion.matches && !document.hidden
+    let entryProgress = 0
+    let returnStart = null
+    let returnFrom = .74
+    const canAnimate = () => (!pausedRef.current || enteringRef.current || returningRef.current) && !motion.matches && !document.hidden
 
     function draw() {
       context.clearRect(0, 0, width, height)
@@ -75,15 +80,26 @@ export default function LandingParticles({ paused, entering, targetRef }) {
       canvas.width = Math.round(width * ratio)
       canvas.height = Math.round(height * ratio)
       context.setTransform(ratio, 0, 0, ratio, 0, 0)
-      if (entryStart !== null) {
+      if (entryStart !== null || returnStart !== null) {
         // Keep the same dust during rotation and retarget its remaining flight.
         for (const particle of particles) {
           particle.entryX *= width / Math.max(1, oldWidth)
           particle.entryY *= height / Math.max(1, oldHeight)
           particle.scatterX *= width / Math.max(1, oldWidth)
           particle.scatterY *= height / Math.max(1, oldHeight)
+          particle.homeX *= width / Math.max(1, oldWidth)
+          particle.homeY *= height / Math.max(1, oldHeight)
+          particle.spreadY *= height / Math.max(1, oldHeight)
+          particle.lineWidth = width
+          particle.lineHeight = height
         }
-        stepParticleEntry(particles, (performance.now() - entryStart) / ENTRY_PARTICLE_DURATION, target)
+        if (returnStart !== null) {
+          const progress = Math.min(1, (performance.now() - returnStart) / ENTRY_PARTICLE_DURATION)
+          stepParticleEntry(particles, returnFrom * (1 - progress), target)
+        } else {
+          entryProgress = (performance.now() - entryStart) / ENTRY_PARTICLE_DURATION
+          stepParticleEntry(particles, entryProgress, target)
+        }
       } else {
         const next = createParticleLine(compact.matches ? 160 : 460, width, height, { scattered: !particles.length && !pausedRef.current && !motion.matches })
         if (particles.length && oldWidth && oldHeight) {
@@ -107,12 +123,17 @@ export default function LandingParticles({ paused, entering, targetRef }) {
         previous = now
         lastDraw = now
         elapsed += delta
-        if (entryStart !== null) {
-          const progress = (now - entryStart) / ENTRY_PARTICLE_DURATION
-          stepParticleEntry(particles, progress, target)
+        if (returnStart !== null) {
+          const progress = Math.min(1, (now - returnStart) / ENTRY_PARTICLE_DURATION)
+          stepParticleEntry(particles, returnFrom * (1 - progress), target)
+          draw()
+          if (progress >= 1) { frame = 0; return }
+        } else if (entryStart !== null) {
+          entryProgress = (now - entryStart) / ENTRY_PARTICLE_DURATION
+          stepParticleEntry(particles, entryProgress, target)
           draw()
           // Leave the completed ring painted, with no ongoing animation work.
-          if (progress >= 1) { frame = 0; return }
+          if (entryProgress >= 1) { frame = 0; return }
         } else {
           stepParticleLine(particles, delta, elapsed)
           draw()
@@ -125,8 +146,30 @@ export default function LandingParticles({ paused, entering, targetRef }) {
       frame = 0
       previous = 0
       lastDraw = 0
-      if (enteringRef.current && entryStart === null) {
+      if (returningRef.current && returnStart === null) {
+        if (entryStart === null) {
+          // A direct section link may not have played the entrance first.
+          beginParticleEntry(particles, width, height)
+          entryProgress = .74
+          stepParticleEntry(particles, entryProgress, target)
+          draw()
+        }
+        returnFrom = Math.min(.74, entryProgress)
+        returnStart = performance.now()
+      } else if (!returningRef.current && (returnStart !== null || (!enteringRef.current && entryStart !== null))) {
+        stepParticleEntry(particles, 0, target)
+        for (const particle of particles) {
+          particle.vx = 0
+          particle.vy = 0
+          particle.flight = 0
+        }
+        entryStart = null
+        returnStart = null
+        entryProgress = 0
+      }
+      if (enteringRef.current && entryStart === null && returnStart === null) {
         beginParticleEntry(particles, width, height)
+        entryProgress = 0
         entryStart = performance.now()
       }
       if (canAnimate()) frame = window.requestAnimationFrame(tick)

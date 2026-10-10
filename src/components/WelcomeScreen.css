@@ -6,6 +6,9 @@
 }
 .welcome-screen.is-leaving { pointer-events: none; animation: welcome-depart 900ms ease both; }
 .welcome-screen.is-leaving .welcome-portrait { visibility: hidden; }
+.welcome-screen.is-returning { animation: welcome-return 900ms ease both; }
+.welcome-portrait.is-flying { visibility: hidden; }
+@keyframes welcome-return { from { opacity: 0; } to { opacity: 1; } }
 @keyframes welcome-depart { 0%, 30% { opacity: 1; transform: none; } 100% { opacity: 0; transform: scale(1.035); } }
 .welcome-screen .particle-background { height: 100%; mask-image: none; }
 .welcome-screen .light-ribbon { top: 45%; }

@@ -4,6 +4,7 @@ import './App.css'
 import ParticleBackground from './components/ParticleBackground'
 import WelcomeScreen from './components/WelcomeScreen'
 import LandingParticles from './components/LandingParticles'
+import { ENTRY_PARTICLE_DURATION } from './components/landingParticleMotion'
 import ReactiveName from './components/ReactiveName'
 import ScrollSpace from './components/ScrollSpace'
 import ProjectTooltip from './components/ProjectTooltip'
@@ -69,6 +70,9 @@ export default function App() {
   const profileRef = useRef(null)
   const [portraitFlight, setPortraitFlight] = useState(null)
   const [entryParticles, setEntryParticles] = useState(false)
+  const [returning, setReturning] = useState(false)
+  const returnSource = useRef(null)
+  const returnTimer = useRef(null)
   const flightTimer = useRef(null)
   const featuredArtRef = useRef(null)
   const enteredFromWelcome = useRef(false)
@@ -92,9 +96,34 @@ export default function App() {
     setEntryParticles(true)
     flightTimer.current = window.setTimeout(() => setPortraitFlight(null), 960)
   }, [])
+  const prepareReturn = useCallback(target => {
+    const source = returnSource.current
+    if (!source || !target) return
+    window.clearTimeout(flightTimer.current)
+    setPortraitFlight({ reverse: true, x: source.left, y: source.top, size: source.width, targetX: target.left - source.left, targetY: target.top - source.top, scale: target.width / source.width })
+    flightTimer.current = window.setTimeout(() => setPortraitFlight(null), 960)
+  }, [])
+  function returnToLanding() {
+    if (!entered || returning) return
+    closePreview()
+    setLaunch(null)
+    window.clearTimeout(flightTimer.current)
+    setPortraitFlight(null)
+    returnSource.current = profileRef.current?.getBoundingClientRect()
+    enteredFromWelcome.current = false
+    window.history.replaceState(null, '', window.location.pathname + window.location.search)
+    navigate(0, 'instant')
+    setEntryParticles(false)
+    setEntered(false)
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setReturning(true)
+      returnTimer.current = window.setTimeout(() => setReturning(false), ENTRY_PARTICLE_DURATION)
+    }
+  }
   useEffect(() => () => {
     window.clearTimeout(previewTimer.current)
     window.clearTimeout(flightTimer.current)
+    window.clearTimeout(returnTimer.current)
   }, [])
   const enterPortfolio = useCallback(() => {
     enteredFromWelcome.current = true
@@ -164,9 +193,9 @@ export default function App() {
     window.history.replaceState(null, '', event.currentTarget.hash)
   }
   return <>
-    {!entered && <WelcomeScreen paused={ambiencePaused} onToggleMotion={() => setAmbiencePaused(value => !value)} onEnter={enterPortfolio} onPrepareEnter={prepareEntry} />}
-    {(!entered || entryParticles) && <LandingParticles paused={ambiencePaused} entering={entryParticles} targetRef={profileRef} />}
-    {portraitFlight && <div className="portrait-flight portrait-frame" aria-hidden="true" style={{ left: portraitFlight.x, top: portraitFlight.y, width: portraitFlight.size, '--portrait-x': `${portraitFlight.targetX}px`, '--portrait-y': `${portraitFlight.targetY}px`, '--portrait-scale': portraitFlight.scale }}><img className="intro-portrait" src="/images/ahmad-zamir.png" alt="" /></div>}
+    {!entered && <WelcomeScreen paused={ambiencePaused} returning={returning} portraitReturning={Boolean(portraitFlight?.reverse)} onPrepareReturn={prepareReturn} onToggleMotion={() => setAmbiencePaused(value => !value)} onEnter={enterPortfolio} onPrepareEnter={prepareEntry} />}
+    {(!entered || entryParticles) && <LandingParticles paused={ambiencePaused} entering={entryParticles} returning={returning} targetRef={profileRef} />}
+    {portraitFlight && <div key={portraitFlight.reverse ? 'return' : 'entry'} className="portrait-flight portrait-frame" aria-hidden="true" style={{ left: portraitFlight.x, top: portraitFlight.y, width: portraitFlight.size, '--portrait-x': `${portraitFlight.targetX}px`, '--portrait-y': `${portraitFlight.targetY}px`, '--portrait-scale': portraitFlight.scale }}><img className="intro-portrait" src="/images/ahmad-zamir.png" alt="" /></div>}
     <div inert={!entered} aria-hidden={!entered}>
     {launch && <div key={launch.id} className="project-launch" aria-hidden="true" onAnimationEnd={event => { if (event.target === event.currentTarget) setLaunch(null) }}>
       <div className="project-launch-tile" style={{ '--launch-x': `${launch.x}px`, '--launch-y': `${launch.y}px`, '--launch-width': `${launch.width}px`, '--launch-height': `${launch.height}px`, '--launch-target-x': `${launch.targetX}px`, '--launch-target-y': `${launch.targetY}px`, '--launch-scale': launch.scale }}>
@@ -247,7 +276,12 @@ export default function App() {
         </div>
       </main>
       <footer className="shell footer side-scroll-footer">
-        <span className="footer-copyright">© {new Date().getFullYear()} Ahmad Zamir</span>
+        <div className="footer-home">
+          <button className="landing-return" type="button" onClick={returnToLanding} disabled={returning} aria-label="Back to landing page" title="Back to landing page">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6-6 6 6 6M4 12h16" /></svg><span>Landing</span>
+          </button>
+          <span className="footer-copyright">© {new Date().getFullYear()} Ahmad Zamir</span>
+        </div>
         <nav className="section-pagination" aria-label="Browse portfolio sections">
           <button type="button" aria-label="Previous section" disabled={panel === 0} onClick={() => navigate(panel - 1)}>←</button>
           {['Work', 'About', 'Skills', 'Contact'].map((label, index) => <button type="button" key={label} className={`section-dot ${panel === index ? 'is-active' : ''}`} aria-label={`Go to ${label}`} aria-current={panel === index ? 'step' : undefined} onClick={() => navigate(index)} />)}
