@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { github, projects } from './data/projects'
 import './App.css'
 import ParticleBackground from './components/ParticleBackground'
+import SectionLauncher from './components/SectionLauncher'
 import WelcomeScreen from './components/WelcomeScreen'
 import LandingParticles from './components/LandingParticles'
 import { ENTRY_PARTICLE_DURATION } from './components/landingParticleMotion'
@@ -61,20 +62,20 @@ export default function App() {
   const [launch, setLaunch] = useState(null)
   const [hasSelectedProject, setHasSelectedProject] = useState(false)
   const launchSequence = useRef(0)
-  const [ambiencePaused, setAmbiencePaused] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
-  const [entered, setEntered] = useState(() => Boolean(window.location.hash))
+  const [ambiencePaused] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  const [screen, setScreen] = useState(() => ['#projects', '#about', '#skills', '#contact'].includes(window.location.hash) ? 'content' : 'landing')
+  const entered = screen === 'opening' || screen === 'content'
+  const showMenu = useCallback(() => setScreen('menu'), [])
+  const finishOpening = useCallback(() => setScreen('content'), [])
   const { trackRef: mainRef, panel, navigate } = useSideScroll(entered)
+  const [entryParticles, setEntryParticles] = useState(false)
+  const [returning, setReturning] = useState(false)
+  const menuProfileRef = useRef(null)
+  const returnTimer = useRef(null)
   const [preview, setPreview] = useState(null)
   const previewTimer = useRef(null)
   const profileRef = useRef(null)
-  const [portraitFlight, setPortraitFlight] = useState(null)
-  const [entryParticles, setEntryParticles] = useState(false)
-  const [returning, setReturning] = useState(false)
-  const returnSource = useRef(null)
-  const returnTimer = useRef(null)
-  const flightTimer = useRef(null)
   const featuredArtRef = useRef(null)
-  const enteredFromWelcome = useRef(false)
   const closePreview = useCallback(() => {
     window.clearTimeout(previewTimer.current)
     setPreview(null)
@@ -88,49 +89,43 @@ export default function App() {
     window.clearTimeout(previewTimer.current)
     setPreview(index)
   }
-  const prepareEntry = useCallback(source => {
-    const target = profileRef.current?.getBoundingClientRect()
-    if (!source || !target || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    setPortraitFlight({ x: source.left, y: source.top, size: source.width, targetX: target.left - source.left, targetY: target.top - source.top, scale: target.width / source.width })
-    setEntryParticles(true)
-    flightTimer.current = window.setTimeout(() => setPortraitFlight(null), 960)
-  }, [])
-  const prepareReturn = useCallback(target => {
-    const source = returnSource.current
-    if (!source || !target) return
-    window.clearTimeout(flightTimer.current)
-    setPortraitFlight({ reverse: true, x: source.left, y: source.top, size: source.width, targetX: target.left - source.left, targetY: target.top - source.top, scale: target.width / source.width })
-    flightTimer.current = window.setTimeout(() => setPortraitFlight(null), 960)
-  }, [])
-  function returnToLanding() {
-    if (!entered || returning) return
-    closePreview()
-    setLaunch(null)
-    window.clearTimeout(flightTimer.current)
-    setPortraitFlight(null)
-    returnSource.current = profileRef.current?.getBoundingClientRect()
-    enteredFromWelcome.current = false
-    window.history.replaceState(null, '', window.location.pathname + window.location.search)
-    navigate(0, 'instant')
+  function releaseRing() {
     setEntryParticles(false)
-    setEntered(false)
+    window.clearTimeout(returnTimer.current)
     if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       setReturning(true)
       returnTimer.current = window.setTimeout(() => setReturning(false), ENTRY_PARTICLE_DURATION)
     }
   }
+  function returnToLanding() {
+    releaseRing()
+    setScreen('landing')
+  }
+  function returnToMenu() {
+    closePreview()
+    setLaunch(null)
+    window.history.replaceState(null, '', window.location.pathname + window.location.search)
+    navigate(0, 'instant')
+    releaseRing()
+    setScreen('menu')
+  }
   useEffect(() => () => {
     window.clearTimeout(previewTimer.current)
-    window.clearTimeout(flightTimer.current)
     window.clearTimeout(returnTimer.current)
   }, [])
-  const enterPortfolio = useCallback(() => {
-    enteredFromWelcome.current = true
-    setEntered(true)
-  }, [])
+  function openSection(event, index) {
+    event.preventDefault()
+    closePreview()
+    window.history.replaceState(null, '', event.currentTarget.hash)
+    navigate(index, 'instant')
+    window.clearTimeout(returnTimer.current)
+    setReturning(false)
+    setEntryParticles(!window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+    setScreen('opening')
+  }
   useEffect(() => {
-    if (entered && enteredFromWelcome.current) mainRef.current?.focus({ preventScroll: true })
-  }, [entered, mainRef])
+    if (screen === 'content') mainRef.current?.focus({ preventScroll: true })
+  }, [screen, mainRef])
   const tiles = useRef([])
   const project = projects[selected]
   useEffect(() => {
@@ -192,27 +187,27 @@ export default function App() {
     window.history.replaceState(null, '', event.currentTarget.hash)
   }
   return <>
-    {!entered && <WelcomeScreen paused={ambiencePaused} returning={returning} portraitReturning={Boolean(portraitFlight?.reverse)} onPrepareReturn={prepareReturn} onToggleMotion={() => setAmbiencePaused(value => !value)} onEnter={enterPortfolio} onPrepareEnter={prepareEntry} />}
-    {(!entered || entryParticles) && <LandingParticles paused={ambiencePaused} entering={entryParticles} returning={returning} targetRef={profileRef} />}
-    {portraitFlight && <div key={portraitFlight.reverse ? 'return' : 'entry'} className={`portrait-flight portrait-frame ${portraitFlight.reverse ? 'is-returning' : ''}`} aria-hidden="true" style={{ left: portraitFlight.x, top: portraitFlight.y, width: portraitFlight.size, '--portrait-x': `${portraitFlight.targetX}px`, '--portrait-y': `${portraitFlight.targetY}px`, '--portrait-scale': portraitFlight.scale }}><img className="intro-portrait" src="/images/ahmad-zamir.png" alt="" /></div>}
-    <div inert={!entered} aria-hidden={!entered}>
+    {screen === 'landing' && <WelcomeScreen paused={ambiencePaused} onEnter={showMenu} />}
+    {screen !== 'content' && <SectionLauncher active={screen !== 'landing'} portraitRef={menuProfileRef} dockRef={profileRef} paused={ambiencePaused} onNavigate={openSection} onFinish={finishOpening} onBack={returnToLanding} />}
+    {(screen === 'landing' || screen === 'menu' || entryParticles) && <LandingParticles burst={screen === 'landing'} paused={ambiencePaused} entering={entryParticles} returning={returning} targetRef={entered ? profileRef : menuProfileRef} />}
+    <div inert={screen !== 'content'} aria-hidden={screen !== 'content'} style={{ visibility: entered ? 'visible' : 'hidden' }}>
     {launch && <div key={launch.id} className="project-launch" aria-hidden="true" onAnimationEnd={event => { if (event.target === event.currentTarget) setLaunch(null) }}>
       <div className="project-launch-tile" style={{ '--launch-x': `${launch.x}px`, '--launch-y': `${launch.y}px`, '--launch-width': `${launch.width}px`, '--launch-height': `${launch.height}px`, '--launch-target-x': `${launch.targetX}px`, '--launch-target-y': `${launch.targetY}px`, '--launch-scale': launch.scale }}>
         <ProjectArt project={projects[launch.index]} small />
       </div>
     </div>}
     <a className="skip-link" href="#main">Skip to content</a>
-    <div className={`console theme-${project.theme}`} id="top">
+    <div className={`console theme-${project.theme} ${screen === 'opening' ? 'is-section-opening' : ''}`} id="top">
       <ScrollSpace active={entered} paused={ambiencePaused} trackRef={mainRef} />
       <div className="ambient" aria-hidden="true" />
       <ParticleBackground paused={!entered || ambiencePaused || panel !== 0} />
       <header className="site-header shell">
         <a href="#top" className="brand" aria-label="Ahmad Zamir home" onClick={event => navigateLink(event, 0)}>az<span> / </span></a>
-        <nav aria-label="Main navigation">{['Work', 'About', 'Skills', 'Contact'].map((label, index) => <a key={label} className={panel === index ? 'nav-active' : ''} aria-current={panel === index ? 'page' : undefined} href={`#${['projects', 'about', 'skills', 'contact'][index]}`} onClick={event => navigateLink(event, index)}>{label}</a>)}</nav>
+
         <div className="header-contact-card">
         <nav className="header-socials" aria-label="Social and contact links"><a href={github} target="_blank" rel="noreferrer">GitHub</a><a href={linkedin} target="_blank" rel="noreferrer">LinkedIn</a><a href={email} target="_blank" rel="noreferrer">Email</a><a href="https://wa.me/60132418482" target="_blank" rel="noreferrer">WhatsApp</a></nav>
         </div>
-        <a className={`header-profile ${portraitFlight ? 'is-arriving' : ''}`} href="#about" onClick={event => navigateLink(event, 1)} aria-label="About Ahmad Zamir">
+        <a className="header-profile" href="#about" onClick={event => navigateLink(event, 1)} aria-label="About Ahmad Zamir">
           <div ref={profileRef} className="portrait-frame header-portrait"><img className="intro-portrait" src="/images/ahmad-zamir.png" alt="" width="44" height="44" /></div>
           <span>Ahmad Zamir<span className="profile-caption">View profile</span></span>
         </a>
@@ -231,7 +226,6 @@ export default function App() {
             {projects.map((item, index) => <button key={item.id} ref={el => { tiles.current[index] = el }} className={`project-tile ${index === selected ? 'is-selected' : ''}`} aria-pressed={index === selected} aria-controls="project-details" aria-describedby={preview === index ? `preview-${item.id}` : undefined} onPointerEnter={event => { if (event.pointerType === 'mouse') showPreview(index) }} onPointerLeave={leavePreview} onFocus={() => showPreview(index)} onBlur={closePreview} onClick={() => selectProject(index)} onKeyDown={event => { if (event.key === 'Escape') closePreview(); navigateProjects(event, index) }}>
               <ProjectArt project={item} small /><span className="tile-title">{item.title}</span>
             </button>)}
-            <a className="all-work" href={github + '?tab=repositories'} target="_blank" rel="noreferrer"><span>More on GitHub</span></a>
           </div>
           <div className={`featured ${hasSelectedProject ? 'project-entering' : ''}`} id="project-details">
             <div className="featured-copy" key={project.id}>
@@ -270,8 +264,8 @@ export default function App() {
       </main>
       <footer className="shell footer side-scroll-footer">
         <div className="footer-home">
-          <button className="landing-return" type="button" onClick={returnToLanding} disabled={returning} aria-label="Back to landing page" title="Back to landing page">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6-6 6 6 6M4 12h16" /></svg><span>Landing</span>
+          <button className="landing-return" type="button" onClick={returnToMenu} aria-label="Back to section menu" title="Back to section menu">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6-6 6 6 6M4 12h16" /></svg><span>Menu</span>
           </button>
           <span className="footer-copyright">© {new Date().getFullYear()} Ahmad Zamir</span>
         </div>

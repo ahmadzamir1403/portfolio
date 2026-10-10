@@ -1,0 +1,22 @@
+/* A persistent section launcher, before the profile and contact links. */
+.console .site-header { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; height: auto; gap: 12px 24px; padding-block: 12px 16px; }
+.section-menu { position: relative; display: flex; justify-content: flex-start; gap: 10px; width: min(100%, 442px); min-width: 0; padding: 8px 9px 12px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scroll-padding-inline: 9px; scrollbar-width: thin; scrollbar-color: #d0ad7940 transparent; font-size: 11px; }
+.section-menu-link { flex: 0 0 96px; min-height: 78px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border: 1px solid transparent; border-radius: 16px; color: #aebdce; scroll-snap-align: center; transition: color 180ms ease, background 180ms ease, border-color 180ms ease; }
+.section-menu-icon { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 13px; border: 1px solid #bed4ec26; background: linear-gradient(135deg, #aacbe90c, #10172280); transition: border-color 180ms ease, box-shadow 180ms ease; }
+.section-menu-icon svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.section-menu-link:hover { color: #eef6ff; background: #bed4ec08; }
+.section-menu-link.is-active { color: #f0d7ad; background: linear-gradient(145deg, #d0ad7919, #d0ad7906); border-color: #d0ad7938; }
+.section-menu-link.is-active .section-menu-icon { border-color: #d0ad7970; box-shadow: 0 0 20px #d0ad7912; }
+.section-menu-link:focus-visible { outline-offset: -2px; }
+.console .site-header > .brand { grid-row: 1; grid-column: 1; }
+.console .site-header .header-contact-card { grid-row: 1; grid-column: 2; width: auto; justify-self: end; margin: 0; }
+.console .site-header > .header-profile { grid-row: 1; grid-column: 3; }
+@media (max-width: 800px) {
+  .console .site-header { gap: 8px 20px; padding-block: 8px 12px; }
+  .console .site-header .header-contact-card { grid-row: 2; grid-column: 1 / -1; justify-self: stretch; width: 100%; padding-block: 4px; }
+}
+@media (max-height: 600px) {
+  .section-menu-link { min-height: 62px; gap: 4px; }
+  .section-menu-icon { width: 32px; height: 32px; border-radius: 10px; }
+  .section-menu-icon svg { width: 20px; height: 20px; }
+}

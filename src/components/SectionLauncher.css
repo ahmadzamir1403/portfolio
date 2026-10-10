@@ -1,0 +1,88 @@
+.section-launcher { position: fixed; inset: 0; z-index: 200; isolation: isolate; overflow: hidden; display: grid; place-items: center; background: radial-gradient(ellipse at 94% 23%, #34455c, #192331 27%, transparent 60%), radial-gradient(ellipse at 15% 90%, #4e3c2b38, transparent 50%), #0b0f17; }
+.launcher-brand { position: absolute; top: 28px; left: 32px; color: #c1cad7; font-size: 26px; letter-spacing: -2px; }
+.section-launcher .section-menu { width: max-content; max-width: calc(100% - 40px); gap: 18px; padding: 12px; font-size: 13px; }
+.section-launcher .section-menu-link { flex-basis: 140px; min-height: 132px; gap: 16px; background: #15202e80; border-color: #bed4ec1a; border-radius: 22px; }
+.section-launcher .section-menu-icon { width: 58px; height: 58px; border-radius: 18px; }
+.section-launcher .section-menu-icon svg { width: 30px; height: 30px; }
+.section-launcher .section-menu-link:hover, .section-launcher .section-menu-link:focus-visible { color: #f0d7ad; background: #d0ad7914; border-color: #d0ad7950; }
+@media (max-width: 640px) { .section-launcher .section-menu { gap: 12px; max-width: calc(100% - 32px); } .section-launcher .section-menu-link { flex-basis: 104px; min-height: 116px; gap: 12px; } .section-launcher .section-menu-icon { width: 48px; height: 48px; border-radius: 15px; } .launcher-brand { top: 22px; left: 24px; } }
+@media (max-height: 440px) { .section-launcher .section-menu-link { min-height: 100px; } }
+
+.launcher-back { position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%); border: 1px solid #bed4ec26; border-radius: 22px; padding: 9px 18px; background: #15202e80; color: #b9c6d7; font: inherit; font-size: 11px; cursor: pointer; }
+.launcher-back:hover { color: #f0d7ad; border-color: #d0ad7950; }
+.section-launcher.is-opening { pointer-events: none; animation: launcher-dissolve 1400ms ease both; }
+.section-launcher.is-opening .section-menu, .section-launcher.is-opening .launcher-back { opacity: 0; transition: opacity 300ms ease; }
+.section-launcher .launcher-flight { position: fixed; margin: 0; color: #f0d7ad; border-color: #d0ad7970; background: linear-gradient(145deg, #273445, #101722); box-shadow: 0 0 70px #c1dcff26; transform-origin: center; animation: launcher-card-zoom 1400ms cubic-bezier(.4,0,.2,1) both; }
+.is-section-opening .portfolio-track { animation: section-arrive 1400ms cubic-bezier(.4,0,.2,1) both; transform-origin: 50% 45%; }
+@keyframes launcher-card-zoom {
+  0% { transform: translate3d(0, 0, 0) scale(.35); opacity: 1; }
+  20% { opacity: 1; }
+  50% { transform: translate3d(var(--menu-zoom-x), var(--menu-zoom-y), 0) scale(3); opacity: 1; }
+  65% { transform: translate3d(var(--menu-zoom-x), var(--menu-zoom-y), 0) scale(4.5); opacity: 0; }
+  100% { transform: translate3d(var(--menu-zoom-x), var(--menu-zoom-y), 0) scale(5.5); opacity: 0; }
+}
+@keyframes launcher-dissolve { 0%, 40% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes section-arrive { 0%, 65% { opacity: 0; transform: scale(.98); } 100% { opacity: 1; transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .section-launcher.is-opening, .section-launcher .launcher-flight, .is-section-opening .portfolio-track { animation: none; } }
+
+/* Keep the menu and its miniature page together without shifting on hover. */
+.launcher-layout { width: min(680px, calc(100% - 32px)); display: grid; gap: 22px; max-height: calc(100svh - 144px); overflow-y: auto; scrollbar-width: none; }
+.launcher-layout::-webkit-scrollbar { display: none; }
+.section-launcher .launcher-layout .section-menu { max-width: 100%; margin-inline: auto; }
+.section-launcher .section-menu-link.is-previewed { color: #f0d7ad; background: #d0ad7914; border-color: #d0ad7950; }
+.launcher-preview { position: relative; display: flex; flex-direction: column; height: 290px; border: 1px solid #bed4ec30; border-radius: 18px; background: radial-gradient(ellipse at 95% 10%, #27384b, transparent 75%), #0c121d; box-shadow: 0 20px 60px #02060d55; overflow: hidden; }
+.section-preview-content { padding: 20px 24px; width: 100%; min-height: 100%; color: #e5eaf1; }
+.section-preview-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding-bottom: 14px; margin-bottom: 16px; border-bottom: 1px solid #bed4ec1c; }
+.preview-kicker { font-size: 10px; color: #a7b7ca; letter-spacing: .5px; }
+.section-preview-heading h2 { margin: 0; font-size: 16px; font-weight: 500; }
+.section-preview-content h3 { font-size: 13px; font-weight: 500; line-height: 1.4; margin: 0 0 6px; }
+.section-preview-content p { font-size: 11px; line-height: 1.7; color: #b6c2d2; }
+.preview-projects { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.preview-project img { display: block; width: 100%; height: 100px; object-fit: contain; background: #17223166; border-radius: 9px; margin-bottom: 8px; }
+.preview-project p { font-size: 11px; line-height: 1.5; }
+.preview-about { display: flex; align-items: center; gap: 24px; max-width: 540px; }
+.preview-about img { width: 94px; height: 94px; border: 1px solid #d0ad7966; border-radius: 50%; object-fit: cover; }
+.preview-about p + p { margin-top: 8px; }
+.preview-skills { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.preview-skills > div { padding: 10px 12px; border: 1px solid #bed4ec1a; border-radius: 9px; background: #18243366; }
+.preview-skills h3 { font-size: 11px; }
+.preview-skills p { font-size: 10px; }
+.preview-contact { padding-top: 8px; text-align: center; }
+.preview-contact h3 { font-size: 24px; }
+.preview-contact p { overflow-wrap: anywhere; }
+.preview-contact-channels { display: flex; justify-content: center; gap: 10px; margin-top: 18px; }
+.preview-contact-channels span { padding: 7px 16px; border: 1px solid #d0ad7950; border-radius: 6px; color: #ead2ae; font-size: 10px; }
+.launcher-preview-caption { position: relative; flex-shrink: 0; padding: 7px 16px; background: #080e18dd; border-top: 1px solid #bed4ec12; color: #96a9bf; font-size: 9px; letter-spacing: .5px; text-align: center; }
+.launcher-preview-page { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: thin; animation: preview-appear 180ms ease both; }
+@keyframes preview-appear { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+.section-launcher.is-opening .launcher-preview { visibility: hidden; }
+.section-launcher .launcher-preview-flight { overflow: hidden; border: 1px solid #d0ad7970; border-radius: 18px; }
+@media (max-width: 640px) {
+  .launcher-layout { gap: 16px; }
+  .launcher-preview { height: 290px; }
+  .section-preview-content { padding: 16px; }
+  .section-preview-heading { margin-bottom: 14px; }
+  .preview-projects { gap: 10px; }
+  .preview-project img { height: 84px; }
+  .preview-project h3 { font-size: 12px; overflow-wrap: anywhere; }
+  .preview-project p { font-size: 10px; }
+  .preview-about { gap: 14px; }
+  .preview-about img { width: 64px; height: 64px; }
+  .preview-about p { font-size: 10px; }
+  .preview-skills { gap: 8px; }
+  .preview-skills > div { padding: 8px; }
+  .preview-skills h3, .preview-skills p { font-size: 9px; }
+}
+@media (prefers-reduced-motion: reduce) { .launcher-preview-page { animation: none; } }
+
+/* Reserve preview space without displaying a card until an icon is hovered. */
+.launcher-preview.is-empty { visibility: hidden; pointer-events: none; }
+
+/* Fade in the menu after the landing screen has finished leaving. */
+.section-launcher[aria-hidden="false"]:not(.is-opening) .launcher-layout { animation: launcher-menu-arrive 420ms ease-out both; }
+@keyframes launcher-menu-arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .section-launcher[aria-hidden="false"]:not(.is-opening) .launcher-layout { animation: none; } }
+
+.launcher-portrait { visibility: hidden; position: absolute; top: 28px; right: 32px; width: 48px; }
+.launcher-portrait.is-flying { visibility: hidden; }
+@media (max-width: 640px) { .launcher-portrait { top: 22px; right: 24px; } }

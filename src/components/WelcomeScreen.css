@@ -2,11 +2,11 @@
   position: fixed; inset: 0; z-index: 200; isolation: isolate; overflow: hidden;
   display: grid; place-items: center; min-height: 100svh;
   background: radial-gradient(ellipse at 8% 8%, #69605c66, transparent 58%), radial-gradient(ellipse at 23% 96%, #74757238, transparent 48%), linear-gradient(110deg, #29272b, #141419 62%, #080910);
-  opacity: 1; transition: opacity 520ms ease, transform 520ms ease;
+  opacity: 1; transition: opacity 700ms ease, transform 700ms ease;
 }
-.welcome-screen.is-leaving { pointer-events: none; animation: welcome-depart 900ms ease both; }
-.welcome-screen.is-leaving .welcome-portrait { visibility: hidden; }
-.welcome-screen.is-returning { animation: welcome-return 900ms ease both; }
+.welcome-screen.is-leaving { pointer-events: none; animation: welcome-depart 1200ms ease both; }
+.welcome-screen.is-leaving .welcome-portrait { opacity: 0; transition: opacity 700ms ease; }
+.welcome-screen.is-returning { animation: welcome-return 1200ms ease both; }
 .welcome-portrait.is-flying { visibility: hidden; }
 @keyframes welcome-return { from { opacity: 0; } to { opacity: 1; } }
 @keyframes welcome-depart { 0%, 30% { opacity: 1; transform: none; } 100% { opacity: 0; transform: scale(1.035); } }

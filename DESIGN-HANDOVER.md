@@ -151,3 +151,25 @@ Keep all three recognizable and same sizes throughout, clean original Japanese a
 - Landing dust now separates cool distant particles, gold middle particles, and a small number of diffuse foreground lights, using the existing cached glow sprites and animation loop.
 - Updated browser/PWA background colors to match. No dependencies added.
 - Validation: production Vite build and PWA generation passed. Browser visual verification unavailable because the browser tool reports no connected browsers.
+
+
+## Landing, section menu, and page entrance
+
+- Fresh visits open the portrait welcome screen. Clicking, tapping, or pressing Enter/Space reveals a centred icon menu for Work, About, Skills, and Contact.
+- The menu scrolls horizontally on narrow screens. Selecting an icon expands its preview from a small card toward the viewport centre over 1400ms, then fades into the matching section. The preview fades before the full page text appears. Reduced motion skips the transition.
+- Content stays inert during the entrance; focus moves to main after it completes. Timers and overflow styles are cleaned up on unmount. Double activation is guarded.
+- Section links with URL fragments still open directly. The content footer returns to Menu; the menu has a Landing action. Shared icon data lives in src/data/sections.js.
+- Build and lint validation performed; live browser animation verification unavailable in the tool session.
+
+
+## Section previews
+
+- The centred menu shows a miniature preview below the icons. Mouse hover updates Work, About, Skills, or Contact previews; leaving the icon hides the preview. Previews are initially hidden. Work previews reuse the project thumbnails and metadata.
+- Selecting an icon expands the matching preview toward the viewport centre and fades into the full section. The menu stays inert during the transition; reduced motion opens immediately.
+- Preview space is reserved to avoid layout movement while browsing; short screens can scroll the menu/preview group.
+- Production build and lint pass. Browser visual verification remains unavailable because the browser runtime fails during sandbox setup.
+
+- Restored the existing entry particle gathering when a section opens. The completed particle ring remains painted around the header profile picture until returning to Menu; reduced motion skips gathering. Build and lint pass.
+
+- The menu has no visible profile picture or duplicate page-header icon menu. Preview captions stay below the text, and the project rail no longer has a More on GitHub button.
+- Particle edge recycling waits until visible dust leaves the canvas. Returning to Menu hides the compact ring before revealing dispersed dust; regression tests cover both behaviors.

@@ -5,19 +5,25 @@ import './ParticleBackground.css'
 
 const colors = ['244, 225, 188', '214, 180, 128', '169, 191, 216']
 
-export default function LandingParticles({ paused, entering, returning, targetRef }) {
+export default function LandingParticles({ paused, entering, returning, burst = true, targetRef }) {
   const canvasRef = useRef(null)
   const pausedRef = useRef(paused)
+  const burstRef = useRef(burst)
   const enteringRef = useRef(entering)
   const returningRef = useRef(returning)
   const syncRef = useRef(null)
+  const resizeRef = useRef(null)
+  const targetSourceRef = useRef(targetRef)
 
   useEffect(() => {
     pausedRef.current = paused
+    burstRef.current = burst
     enteringRef.current = entering
     returningRef.current = returning
+    targetSourceRef.current = targetRef
     syncRef.current?.()
-  }, [paused, entering, returning])
+    resizeRef.current?.()
+  }, [paused, entering, returning, burst, targetRef])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -75,7 +81,9 @@ export default function LandingParticles({ paused, entering, returning, targetRe
       height = canvas.clientHeight
       if (!width || !height) return
       const bounds = canvas.getBoundingClientRect()
-      const portrait = targetRef.current?.getBoundingClientRect()
+      const portraitElement = targetSourceRef.current.current
+      if (portraitElement) observer.observe(portraitElement)
+      const portrait = portraitElement?.getBoundingClientRect()
       target = portrait ? { x: portrait.left + portrait.width / 2 - bounds.left, y: portrait.top + portrait.height / 2 - bounds.top, radius: portrait.width / 2 + 4 } : { x: width / 2, y: height * .35, radius: 26 }
       const ratio = Math.min(window.devicePixelRatio || 1, compact.matches ? 1 : 1.5)
       canvas.width = Math.round(width * ratio)
@@ -152,18 +160,10 @@ export default function LandingParticles({ paused, entering, returning, targetRe
       previous = 0
       lastDraw = 0
       if (returningRef.current && returnStart === null) {
-        if (entryStart === null) {
-          // A direct section link may not have played the entrance first.
-          beginParticleEntry(particles, width, height)
-          entryProgress = .74
-          stepParticleEntry(particles, entryProgress, target)
-          draw()
-        }
         beginParticleReturn(particles)
         returnStart = performance.now()
       } else if (!returningRef.current && (returnStart !== null || (!enteringRef.current && entryStart !== null))) {
-        if (returnStart === null) beginParticleReturn(particles)
-        stepParticleReturn(particles, 1, elapsed)
+        // Preserve the last drawn positions when a flight is interrupted.
         for (const particle of particles) {
           particle.vx = 0
           particle.vy = 0
@@ -174,7 +174,7 @@ export default function LandingParticles({ paused, entering, returning, targetRe
         entryProgress = 0
       }
       if (enteringRef.current && entryStart === null && returnStart === null) {
-        beginParticleEntry(particles, width, height)
+        beginParticleEntry(particles, width, height, { burst: burstRef.current })
         entryProgress = 0
         entryStart = performance.now()
       }
@@ -183,9 +183,10 @@ export default function LandingParticles({ paused, entering, returning, targetRe
     }
     const observer = new ResizeObserver(resize)
     observer.observe(canvas)
-    if (targetRef.current) observer.observe(targetRef.current)
-    const header = targetRef.current?.closest('.site-header')
+    if (targetSourceRef.current.current) observer.observe(targetSourceRef.current.current)
+    const header = targetSourceRef.current.current?.closest('.site-header')
     if (header) observer.observe(header)
+    resizeRef.current = resize
     resize()
     syncRef.current = sync
     sync()
@@ -196,12 +197,13 @@ export default function LandingParticles({ paused, entering, returning, targetRe
     return () => {
       window.cancelAnimationFrame(frame)
       syncRef.current = null
+      resizeRef.current = null
       observer.disconnect()
       document.removeEventListener('visibilitychange', sync)
       motion.removeEventListener('change', sync)
       compact.removeEventListener('change', resize)
     }
-  }, [targetRef])
+  }, [])
 
   // Keep the dust above the fading welcome screen in viewport coordinates.
   return createPortal(<div className="particle-background landing-particles" aria-hidden="true"><canvas ref={canvasRef} /></div>, document.body)

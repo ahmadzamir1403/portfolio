@@ -45,8 +45,9 @@ export function createParticleLine(count, width, height, { scattered = false } =
   return particles
 }
 
-export function beginParticleEntry(particles, width, height) {
+export function beginParticleEntry(particles, width, height, { burst = true } = {}) {
   particles.forEach((particle, index) => {
+    particle.entryBurst = burst
     particle.entryX = particle.x
     particle.entryY = particle.y
     particle.entryOpacity = particle.opacity
@@ -60,8 +61,9 @@ export function beginParticleEntry(particles, width, height) {
 // Burst apart first, then curl into a visible ring around the header portrait.
 export function stepParticleEntry(particles, progress, target) {
   for (const particle of particles) {
-    particle.opacity = particle.entryOpacity
-    if (progress < .22) {
+    const reveal = Math.max(0, Math.min(1, progress))
+    particle.opacity = particle.entryOpacity + (1 - particle.entryOpacity) * reveal * reveal * (3 - 2 * reveal)
+    if (particle.entryBurst && progress < .22) {
       const t = Math.max(0, progress / .22)
       const eased = 1 - (1 - t) ** 3
       particle.x = particle.entryX + (particle.scatterX - particle.entryX) * eased
@@ -69,16 +71,20 @@ export function stepParticleEntry(particles, progress, target) {
       continue
     }
     const delay = particle.depth * .06
-    const t = Math.max(0, Math.min(1, (progress - .22 - delay) / (.52 - delay)))
+    const start = particle.entryBurst ? .22 : 0
+    const t = Math.max(0, Math.min(1, (progress - start - delay) / (.74 - start - delay)))
     const eased = t * t * (3 - 2 * t)
     const u = 1 - eased
     const angle = particle.ringAngle + u * Math.PI * .8
     const ringX = target.x + Math.cos(angle) * target.radius
     const ringY = target.y + Math.sin(angle) * target.radius
-    const controlX = particle.scatterX + (ringX - particle.scatterX) * .28 + Math.sin(particle.phase) * 60
-    const controlY = particle.scatterY + (ringY - particle.scatterY) * .72 + Math.cos(particle.phase) * 45
-    particle.x = u * u * particle.scatterX + 2 * u * eased * controlX + eased * eased * ringX
-    particle.y = u * u * particle.scatterY + 2 * u * eased * controlY + eased * eased * ringY
+    const sourceX = particle.entryBurst ? particle.scatterX : particle.entryX
+    const sourceY = particle.entryBurst ? particle.scatterY : particle.entryY
+    const curve = Math.min(1, Math.hypot(ringX - sourceX, ringY - sourceY) / 160)
+    const controlX = sourceX + (ringX - sourceX) * .28 + Math.sin(particle.phase) * 60 * curve
+    const controlY = sourceY + (ringY - sourceY) * .72 + Math.cos(particle.phase) * 45 * curve
+    particle.x = u * u * sourceX + 2 * u * eased * controlX + eased * eased * ringX
+    particle.y = u * u * sourceY + 2 * u * eased * controlY + eased * eased * ringY
   }
 }
 
@@ -108,7 +114,9 @@ export function stepParticleReturn(particles, progress, time) {
     const controlY2 = particle.returnY + dy * .85
     particle.x = u ** 3 * particle.returnX + 3 * u * u * eased * controlX1 + 3 * u * eased * eased * controlX2 + eased ** 3 * endX
     particle.y = u ** 3 * particle.returnY + 3 * u * u * eased * controlY1 + 3 * u * eased * eased * controlY2 + eased ** 3 * endY
-    particle.opacity = particle.returnOpacity
+    // Hide the compact ring immediately; reveal dust once it has spread out.
+    const reveal = Math.max(0, Math.min(1, (progress - .15) / .3))
+    particle.opacity = particle.returnOpacity * reveal * reveal * (3 - 2 * reveal)
   }
 }
 
@@ -119,7 +127,7 @@ export function stepParticleLine(particles, delta, time) {
     const returning = particle.flight === 0
     // After gathering, transport the dust along the entire curve rather than parking it.
     particle.homeX += particle.speed * flow * delta
-    const wrapped = particle.homeX > particle.lineWidth + 48
+    const wrapped = particle.x > particle.lineWidth + 48
     if (wrapped) particle.homeX = -48
     particle.homeY = streamY(particle.homeX, particle.lineWidth, particle.lineHeight, particle.spreadY)
     const homeY = particle.homeY + Math.sin(time * .9 + particle.phase) * (10 + particle.depth * 10)

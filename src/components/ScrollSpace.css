@@ -6,5 +6,5 @@
 .scroll-moon::before { content: ''; position: absolute; inset: -35%; border-radius: 50%; background: radial-gradient(circle, #bedbf32b, transparent 70%); }
 .scroll-moon-disc { display: block; width: 100%; height: auto; }
 .scroll-vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at 60% 42%, transparent 25%, #03071099 100%), linear-gradient(0deg, #06091155, transparent 24%); }
-@media (max-width: 640px) { .scroll-moon { display: none; } .star-secondary { display: none; } .scroll-stars { opacity: .28; } }
+@media (max-width: 640px) { .scroll-vignette { display: none; } .scroll-moon { display: none; } .star-secondary { display: none; } .scroll-stars { opacity: .28; } }
 @media (prefers-reduced-motion: reduce) { .scroll-nebula, .scroll-stars, .scroll-moon { transform: none; } }
