@@ -34,6 +34,8 @@
 .header-profile:hover .header-portrait { border-color: var(--accent); }
 .header-profile.is-arriving .header-portrait { visibility: hidden; }
 .portrait-flight { position: fixed; z-index: 220; pointer-events: none; transform-origin: top left; animation: portrait-dock 900ms cubic-bezier(.22,1,.36,1) both; }
+.portrait-flight.is-returning { animation: portrait-return 900ms cubic-bezier(.4,0,.2,1) both; }
+@keyframes portrait-return { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(var(--portrait-x), var(--portrait-y), 0) scale(var(--portrait-scale)); } }
 @keyframes portrait-dock { 0%, 12% { transform: translate3d(0, 0, 0) scale(1); } 100% { transform: translate3d(var(--portrait-x), var(--portrait-y), 0) scale(var(--portrait-scale)); } }
 .side-scroll-footer { min-height: 72px; flex-shrink: 0; padding-block: 16px; align-items: center; border-top: 1px solid #ffffff12; }
 .side-scroll-footer .footer-home { display: flex; align-items: center; gap: 16px; }

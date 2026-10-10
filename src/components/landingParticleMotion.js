@@ -74,6 +74,36 @@ export function stepParticleEntry(particles, progress, target) {
   }
 }
 
+export function beginParticleReturn(particles) {
+  for (const particle of particles) {
+    particle.returnX = particle.x
+    particle.returnY = particle.y
+    particle.returnOpacity = particle.opacity
+  }
+}
+
+// Release into the live stream with a gentle curve and no orbital turn.
+export function stepParticleReturn(particles, progress, time) {
+  for (const particle of particles) {
+    const delay = particle.depth * .06
+    const t = Math.max(0, Math.min(1, (progress - delay) / (1 - delay)))
+    const eased = t * t * (3 - 2 * t)
+    const u = 1 - eased
+    particle.homeY = streamY(particle.homeX, particle.lineWidth, particle.lineHeight, particle.spreadY)
+    const endX = particle.homeX
+    const endY = particle.homeY + Math.sin(time * .9 + particle.phase) * (10 + particle.depth * 10)
+    const dx = endX - particle.returnX
+    const dy = endY - particle.returnY
+    const controlX1 = particle.returnX + dx * .35
+    const controlY1 = particle.returnY + dy * .1
+    const controlX2 = particle.returnX + dx * .75
+    const controlY2 = particle.returnY + dy * .85
+    particle.x = u ** 3 * particle.returnX + 3 * u * u * eased * controlX1 + 3 * u * eased * eased * controlX2 + eased ** 3 * endX
+    particle.y = u ** 3 * particle.returnY + 3 * u * u * eased * controlY1 + 3 * u * eased * eased * controlY2 + eased ** 3 * endY
+    particle.opacity = particle.returnOpacity
+  }
+}
+
 export function stepParticleLine(particles, delta, time) {
   const flow = Math.max(0, Math.min(1, time - 2))
   for (const particle of particles) {

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { beginParticleEntry, createParticleLine, ENTRY_PARTICLE_DURATION, stepParticleEntry, stepParticleLine } from './landingParticleMotion'
+import { beginParticleEntry, beginParticleReturn, createParticleLine, ENTRY_PARTICLE_DURATION, stepParticleEntry, stepParticleLine, stepParticleReturn } from './landingParticleMotion'
 import './ParticleBackground.css'
 
 const colors = ['244, 225, 188', '208, 179, 133', '177, 145, 103']
@@ -49,7 +49,6 @@ export default function LandingParticles({ paused, entering, returning, targetRe
     let entryStart = null
     let entryProgress = 0
     let returnStart = null
-    let returnFrom = .74
     const canAnimate = () => (!pausedRef.current || enteringRef.current || returningRef.current) && !motion.matches && !document.hidden
 
     function draw() {
@@ -92,10 +91,14 @@ export default function LandingParticles({ paused, entering, returning, targetRe
           particle.spreadY *= height / Math.max(1, oldHeight)
           particle.lineWidth = width
           particle.lineHeight = height
+          if (returnStart !== null) {
+            particle.returnX *= width / Math.max(1, oldWidth)
+            particle.returnY *= height / Math.max(1, oldHeight)
+          }
         }
         if (returnStart !== null) {
           const progress = Math.min(1, (performance.now() - returnStart) / ENTRY_PARTICLE_DURATION)
-          stepParticleEntry(particles, returnFrom * (1 - progress), target)
+          stepParticleReturn(particles, progress, elapsed)
         } else {
           entryProgress = (performance.now() - entryStart) / ENTRY_PARTICLE_DURATION
           stepParticleEntry(particles, entryProgress, target)
@@ -125,7 +128,7 @@ export default function LandingParticles({ paused, entering, returning, targetRe
         elapsed += delta
         if (returnStart !== null) {
           const progress = Math.min(1, (now - returnStart) / ENTRY_PARTICLE_DURATION)
-          stepParticleEntry(particles, returnFrom * (1 - progress), target)
+          stepParticleReturn(particles, progress, elapsed)
           draw()
           if (progress >= 1) { frame = 0; return }
         } else if (entryStart !== null) {
@@ -154,10 +157,11 @@ export default function LandingParticles({ paused, entering, returning, targetRe
           stepParticleEntry(particles, entryProgress, target)
           draw()
         }
-        returnFrom = Math.min(.74, entryProgress)
+        beginParticleReturn(particles)
         returnStart = performance.now()
       } else if (!returningRef.current && (returnStart !== null || (!enteringRef.current && entryStart !== null))) {
-        stepParticleEntry(particles, 0, target)
+        if (returnStart === null) beginParticleReturn(particles)
+        stepParticleReturn(particles, 1, elapsed)
         for (const particle of particles) {
           particle.vx = 0
           particle.vy = 0
