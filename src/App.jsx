@@ -173,7 +173,7 @@ export default function App() {
     <div className={`console theme-${project.theme}`} id="top">
       <ScrollSpace active={entered} paused={ambiencePaused} trackRef={mainRef} />
       <div className="ambient" aria-hidden="true" />
-      <ParticleBackground paused={!entered || ambiencePaused} />
+      <ParticleBackground paused={!entered || ambiencePaused || panel !== 0} />
       <header className="site-header shell">
         <a href="#top" className="brand" aria-label="Ahmad Zamir home" onClick={event => navigateLink(event, 0)}>az<span> / </span></a>
         <nav aria-label="Main navigation">{['Work', 'About', 'Skills', 'Contact'].map((label, index) => <a key={label} className={panel === index ? 'nav-active' : ''} aria-current={panel === index ? 'page' : undefined} href={`#${['projects', 'about', 'skills', 'contact'][index]}`} onClick={event => navigateLink(event, index)}>{label}</a>)}</nav>

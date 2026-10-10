@@ -60,3 +60,9 @@
 }
 @media (max-width: 640px) { .cursor-aura { width: 380px; height: 300px; filter: blur(28px); } }
 @media (prefers-reduced-motion: reduce) { .cursor-aura { display: none; } }
+
+@media (max-width: 640px), (pointer: coarse) {
+  .cursor-aura { display: none; }
+  .reactive-light { transform: none; }
+  .light-ribbon, .horizon-light { animation: none; }
+}

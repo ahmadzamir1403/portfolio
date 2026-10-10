@@ -85,3 +85,8 @@
 @media (prefers-reduced-motion: reduce) {
   .eva-at-field, .eva-shield-hit { animation: none; opacity: 0; }
 }
+
+@media (max-width: 640px), (pointer: coarse) {
+  .moon-battle { filter: none; animation-name: eva-exchange; }
+  .eva-at-field { filter: none; }
+}

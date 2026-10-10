@@ -23,8 +23,8 @@ export default function ParticleBackground({ paused }) {
     const context = canvas.getContext('2d', { alpha: true })
     if (!context) return
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const compact = window.matchMedia('(max-width: 640px)')
-    const particles = createParticles(compact.matches ? 40 : 82)
+    const compact = window.matchMedia('(max-width: 640px), (pointer: coarse)')
+    let particles = createParticles(compact.matches ? 20 : 82)
     let width = 0
     let height = 0
     let frame = 0
@@ -41,7 +41,7 @@ export default function ParticleBackground({ paused }) {
       if (!width || !height) return
       context.clearRect(0, 0, width, height)
       const time = elapsed / 1000
-      const interactive = canAnimate() && pointer.active
+      const interactive = canAnimate() && !compact.matches && pointer.active
       follow.x += (pointer.x - follow.x) * 0.075
       follow.y += (pointer.y - follow.y) * 0.12
       follow.strength += ((interactive ? 1 : 0) - follow.strength) * 0.09
@@ -49,11 +49,13 @@ export default function ParticleBackground({ paused }) {
       const targetY = interactive ? (pointer.y / height - 0.5) * 22 : 0
       follow.parallaxX += (targetX - follow.parallaxX) * 0.06
       follow.parallaxY += (targetY - follow.parallaxY) * 0.06
-      backdrop.style.setProperty('--parallax-x', follow.parallaxX + 'px')
-      backdrop.style.setProperty('--parallax-y', follow.parallaxY + 'px')
-      backdrop.style.setProperty('--pointer-x', follow.x + 'px')
-      backdrop.style.setProperty('--pointer-y', follow.y + 'px')
-      backdrop.style.setProperty('--pointer-opacity', follow.strength.toFixed(3))
+      if (!compact.matches) {
+        backdrop.style.setProperty('--parallax-x', follow.parallaxX + 'px')
+        backdrop.style.setProperty('--parallax-y', follow.parallaxY + 'px')
+        backdrop.style.setProperty('--pointer-x', follow.x + 'px')
+        backdrop.style.setProperty('--pointer-y', follow.y + 'px')
+        backdrop.style.setProperty('--pointer-opacity', follow.strength.toFixed(3))
+      }
       for (const particle of particles) {
         let x = (particle.x * width + Math.sin(time * 0.09 + particle.phase) * (10 + particle.depth * 20) + width) % width
         let y = ((particle.y - time * particle.speed * 0.04) % 1 + 1) % 1 * height
@@ -74,7 +76,7 @@ export default function ParticleBackground({ paused }) {
         const opacity = (0.14 + particle.depth * 0.42 + influence * 0.14) * shimmer * Math.max(0, edgeFade) * (x < width * 0.42 ? 0.5 : 1)
         const color = particle.warm ? '197, 161, 108' : '151, 123, 83'
         const radius = particle.radius * (0.6 + particle.depth)
-        if (particle.depth > 0.62) {
+        if (!compact.matches && particle.depth > 0.62) {
           const glow = context.createRadialGradient(x, y, 0, x, y, radius * 6)
           glow.addColorStop(0, 'rgba(' + color + ',' + opacity * 0.24 + ')')
           glow.addColorStop(1, 'rgba(' + color + ',0)')
@@ -93,7 +95,7 @@ export default function ParticleBackground({ paused }) {
       width = canvas.clientWidth
       height = canvas.clientHeight
       bounds = canvas.getBoundingClientRect()
-      const ratio = Math.min(window.devicePixelRatio || 1, 1.5)
+      const ratio = Math.min(window.devicePixelRatio || 1, compact.matches ? 1 : 1.5)
       canvas.width = Math.round(width * ratio)
       canvas.height = Math.round(height * ratio)
       context.setTransform(ratio, 0, 0, ratio, 0, 0)
@@ -103,11 +105,11 @@ export default function ParticleBackground({ paused }) {
       if (!canAnimate()) { frame = 0; return }
       if (previous) elapsed += Math.min(now - previous, 100)
       previous = now
-      if (now - lastDraw >= 1000 / 30) { draw(); lastDraw = now }
+      if (now - lastDraw >= 1000 / (compact.matches ? 24 : 30)) { draw(); lastDraw = now }
       frame = window.requestAnimationFrame(tick)
     }
     function movePointer(event) {
-      if (!canAnimate() || event.isPrimary === false) return
+      if (!canAnimate() || compact.matches || event.isPrimary === false) return
       const x = event.clientX - bounds.left
       const y = event.clientY - bounds.top
       if (x < 0 || x > width || y < 0 || y > height) { pointer.active = false; return }
@@ -134,12 +136,17 @@ export default function ParticleBackground({ paused }) {
       if (canAnimate()) frame = window.requestAnimationFrame(tick)
       else if (!document.hidden && width && height) draw()
     }
+    function changeDensity() {
+      particles = createParticles(compact.matches ? 20 : 82)
+      resize()
+    }
     const observer = new ResizeObserver(resize)
     observer.observe(canvas)
     resize()
     sync()
     document.addEventListener('visibilitychange', sync)
     motion.addEventListener('change', sync)
+    compact.addEventListener('change', changeDensity)
     window.addEventListener('pointermove', movePointer, { passive: true })
     window.addEventListener('pointerdown', startTouch, { passive: true })
     window.addEventListener('pointerup', releasePointer, { passive: true })
@@ -152,6 +159,7 @@ export default function ParticleBackground({ paused }) {
       observer.disconnect()
       document.removeEventListener('visibilitychange', sync)
       motion.removeEventListener('change', sync)
+      compact.removeEventListener('change', changeDensity)
       window.removeEventListener('pointermove', movePointer)
       window.removeEventListener('pointerdown', startTouch)
       window.removeEventListener('pointerup', releasePointer)

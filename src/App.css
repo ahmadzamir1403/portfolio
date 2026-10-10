@@ -171,9 +171,11 @@
   flex-shrink: 0;
   overflow: hidden;
   border-radius: 50%;
-  border: 1px solid #f2f1ef66;
+  border: 1px solid #e8cf9dcc;
+  outline: 1px solid #c5a16c99;
+  outline-offset: 5px;
   background: #d6d2ca;
-  box-shadow: 0 0 0 5px #e1ddd70a, 0 12px 28px #15151438;
+  box-shadow: 0 0 0 5px #c5a16c0e, 0 0 24px #c5a16c26, 0 12px 28px #15151438;
 }
 .intro-portrait {
   display: block;

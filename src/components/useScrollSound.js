@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 export default function useScrollSound(active) {
   const [enabled, setEnabled] = useState(true)
   const contextRef = useRef(null)
-  const lastSound = useRef(0)
+  const lastScroll = useRef(-Infinity)
 
   const unlock = useCallback(() => {
     if (!enabled) return
@@ -32,24 +32,26 @@ export default function useScrollSound(active) {
   const play = useCallback(() => {
     const context = contextRef.current
     const now = performance.now()
-    if (!active || !enabled || document.hidden || context?.state !== 'running' || now - lastSound.current < 240) return
-    lastSound.current = now
+    if (!active || !enabled || document.hidden || context?.state !== 'running') return
+    const gap = now - lastScroll.current
+    lastScroll.current = now
+    // Only strike at the start of a scroll burst, including momentum and snap.
+    if (gap < 220) return
     const start = context.currentTime
-    // A clear high resonance and quickly fading upper modes suggest a light glass clink.
-    for (const [frequency, volume, decay] of [[2640, .018, .32], [4039, .007, .18], [6494, .003, .075]]) {
-      const oscillator = context.createOscillator()
-      const envelope = context.createGain()
-      oscillator.type = 'sine'
-      oscillator.frequency.setValueAtTime(frequency, start)
-      envelope.gain.setValueAtTime(0, start)
-      envelope.gain.linearRampToValueAtTime(volume, start + .0015)
-      envelope.gain.exponentialRampToValueAtTime(.0001, start + decay)
-      oscillator.connect(envelope)
-      envelope.connect(context.destination)
-      oscillator.onended = () => { oscillator.disconnect(); envelope.disconnect() }
-      oscillator.start(start)
-      oscillator.stop(start + decay + .01)
-    }
+    // One rounded, low resonance with a short tail: a single "tung".
+    const oscillator = context.createOscillator()
+    const envelope = context.createGain()
+    oscillator.type = 'sine'
+    oscillator.frequency.setValueAtTime(680, start)
+    oscillator.frequency.exponentialRampToValueAtTime(560, start + .07)
+    envelope.gain.setValueAtTime(0, start)
+    envelope.gain.linearRampToValueAtTime(.045, start + .003)
+    envelope.gain.exponentialRampToValueAtTime(.0001, start + .18)
+    oscillator.connect(envelope)
+    envelope.connect(context.destination)
+    oscillator.onended = () => { oscillator.disconnect(); envelope.disconnect() }
+    oscillator.start(start)
+    oscillator.stop(start + .19)
   }, [active, enabled])
 
   return { enabled, toggle: () => setEnabled(value => !value), play }

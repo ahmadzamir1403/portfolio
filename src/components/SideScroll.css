@@ -5,6 +5,7 @@
 .portfolio-track::-webkit-scrollbar { display: none; }
 .portfolio-panel { position: relative; flex: 0 0 100%; min-width: 0; height: 100%; overflow-y: auto; overflow-x: hidden; scroll-snap-align: start; scroll-snap-stop: always; overscroll-behavior-y: contain; scrollbar-width: thin; scrollbar-color: #84775e66 transparent; }
 .portfolio-panel:not(.work-panel) { display: flex; flex-direction: column; }
+.portfolio-panel { contain: layout paint; }
 .portfolio-panel > .section-block { margin-block: auto; padding-block: 44px; border: 0; flex-shrink: 0; }
 .portfolio-panel .about { max-width: 1080px; }
 .portfolio-panel .about-copy { font-size: clamp(15px, 1.3vw, 18px); line-height: 1.9; }
@@ -29,6 +30,7 @@
 .header-profile > span { white-space: nowrap; }
 .profile-caption { display: block; font-size: 10px; color: var(--muted); }
 .portrait-frame.header-portrait { width: 44px; box-shadow: 0 0 0 3px #e1ddd707; transition: border-color 200ms ease; }
+.portrait-frame.header-portrait { outline-offset: 3px; }
 .header-profile:hover .header-portrait { border-color: var(--accent); }
 .header-profile.is-arriving .header-portrait { visibility: hidden; }
 .portrait-flight { position: fixed; z-index: 220; pointer-events: none; transform-origin: top left; animation: portrait-dock 900ms cubic-bezier(.22,1,.36,1) both; }

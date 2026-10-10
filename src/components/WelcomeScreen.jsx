@@ -32,8 +32,8 @@ export default function WelcomeScreen({ paused, onToggleMotion, onEnter, onPrepa
   }
 
   return <section className={`welcome-screen ${leaving ? 'is-leaving' : ''}`} aria-label="Welcome to Ahmad Zamir's portfolio">
-    <LandingParticles paused={paused} />
-    <WelcomeSky paused={paused} />
+    <LandingParticles paused={paused || leaving} targetRef={portraitRef} />
+    <WelcomeSky paused={paused || leaving} />
     <div className="welcome-top"><span className="welcome-brand" aria-hidden="true">az /</span></div>
     <button className="welcome-motion" type="button" onClick={onToggleMotion} aria-label={paused ? 'Play background animation' : 'Pause background animation'}>{paused ? 'Play ambience' : 'Pause ambience'}</button>
     <div className="welcome-identity">
