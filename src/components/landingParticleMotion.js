@@ -2,8 +2,15 @@
 export const ENTRY_PARTICLE_DURATION = 1600
 
 function streamY(x, width, height, spread) {
+  // Use a wider virtual sky on portrait screens so the wave is not squeezed
+  // into a narrow viewport. Blend toward a calmer, open diagonal there.
+  const portrait = Math.max(0, Math.min(1, (height / Math.max(1, width) - 1) / .6))
   const along = x / Math.max(1, width)
-  return height * (.82 - along * .38 - Math.sin(along * Math.PI * 2) * .1) + spread
+  const desktop = .82 - along * .38 - Math.sin(along * Math.PI * 2) * .1
+  const skyWidth = Math.max(width, height * 1.1)
+  const offset = (x - width / 2) / Math.max(1, skyWidth)
+  const mobile = .68 - offset * .42 - Math.sin(offset * Math.PI) * .1
+  return height * (desktop + (mobile - desktop) * portrait) + spread
 }
 
 export function createParticleLine(count, width, height, { scattered = false } = {}) {
@@ -16,7 +23,8 @@ export function createParticleLine(count, width, height, { scattered = false } =
     const depth = random()
     const along = (index + random()) / count
     const homeX = along * width
-    const spreadY = (random() + random() + random() - 1.5) * height * .14
+    const portrait = Math.max(0, Math.min(1, (height / Math.max(1, width) - 1) / .6))
+    const spreadY = (random() + random() + random() - 1.5) * height * (.14 + portrait * .09)
     const homeY = streamY(homeX, width, height, spreadY)
     const scale = Math.max(.85, Math.min(1, width / 738))
     return { homeX, homeY, x: homeX, y: homeY, vx: 0, vy: 0,

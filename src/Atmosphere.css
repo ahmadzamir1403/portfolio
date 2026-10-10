@@ -19,7 +19,6 @@
 .console .light-ribbon { border-top-color: #cfb18412; opacity: .45; top: 50%; }
 .console .ribbon-back { opacity: .2; top: 44%; }
 .console .horizon-light { top: auto; bottom: -15%; right: -10%; opacity: .6; }
-.console .cursor-aura { opacity: calc(var(--pointer-opacity, 0) * .65); }
 .site-header .header-contact-card { background: linear-gradient(125deg, #111722b8, #1e2b3ac2); border-color: #c3d6ea21; border-top-color: #d2e1ef38; border-right-color: #d2e1ef38; box-shadow: 0 12px 30px #02060d24; }
 .skill-card, .contact-panel { background: linear-gradient(125deg, #111721b8, #1e2b3a85); border-color: #c3d6ea1c; border-top-color: #d2e1ef38; border-right-color: #d2e1ef38; box-shadow: -8px 18px 45px #02060d33; }
 .skill-card > span:last-child { color: #bec8d3; }

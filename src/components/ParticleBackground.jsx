@@ -33,6 +33,7 @@ export default function ParticleBackground({ paused }) {
     let lastDraw = 0
     let bounds = canvas.getBoundingClientRect()
     const pointer = { x: 0, y: 0, active: false }
+    let trail = []
     const follow = { x: 0, y: 0, strength: 0, parallaxX: 0, parallaxY: 0 }
     const backdrop = canvas.parentElement
     const canAnimate = () => !paused && !motion.matches && !document.hidden
@@ -52,9 +53,6 @@ export default function ParticleBackground({ paused }) {
       if (!compact.matches) {
         backdrop.style.setProperty('--parallax-x', follow.parallaxX + 'px')
         backdrop.style.setProperty('--parallax-y', follow.parallaxY + 'px')
-        backdrop.style.setProperty('--pointer-x', follow.x + 'px')
-        backdrop.style.setProperty('--pointer-y', follow.y + 'px')
-        backdrop.style.setProperty('--pointer-opacity', follow.strength.toFixed(3))
       }
       for (const particle of particles) {
         let x = (particle.x * width + Math.sin(time * 0.09 + particle.phase) * (10 + particle.depth * 20) + width) % width
@@ -90,8 +88,37 @@ export default function ParticleBackground({ paused }) {
         context.arc(x, y, radius, 0, Math.PI * 2)
         context.fill()
       }
+      // A short tapered meteor tail follows movement and expires at rest.
+      const now = performance.now()
+      trail = trail.filter(point => now - point.time < 280)
+      if (canAnimate() && !compact.matches && trail.length > 1) {
+        context.save()
+        context.lineCap = 'round'
+        for (let index = 1; index < trail.length; index++) {
+          const from = trail[index - 1]
+          const to = trail[index]
+          const fade = Math.max(0, 1 - (now - to.time) / 280)
+          const taper = index / (trail.length - 1)
+          context.strokeStyle = 'rgba(193, 218, 247,' + fade * taper * .8 + ')'
+          context.lineWidth = .25 + taper * 1.65
+          context.beginPath()
+          context.moveTo(from.x, from.y)
+          context.lineTo(to.x, to.y)
+          context.stroke()
+        }
+        const head = trail[trail.length - 1]
+        context.globalAlpha = Math.max(0, 1 - (now - head.time) / 280)
+        context.shadowColor = '#bedcff'
+        context.shadowBlur = 9
+        context.fillStyle = '#fff7e6'
+        context.beginPath()
+        context.arc(head.x, head.y, 2, 0, Math.PI * 2)
+        context.fill()
+        context.restore()
+      }
     }
     function resize() {
+      trail = []
       width = canvas.clientWidth
       height = canvas.clientHeight
       bounds = canvas.getBoundingClientRect()
@@ -109,17 +136,22 @@ export default function ParticleBackground({ paused }) {
       frame = window.requestAnimationFrame(tick)
     }
     function movePointer(event) {
-      if (!canAnimate() || compact.matches || event.isPrimary === false) return
+      if (!canAnimate() || compact.matches || event.isPrimary === false || event.pointerType === 'touch') return
       const x = event.clientX - bounds.left
       const y = event.clientY - bounds.top
-      if (x < 0 || x > width || y < 0 || y > height) { pointer.active = false; return }
+      if (x < 0 || x > width || y < 0 || y > height) { resetPointer(); return }
       if (!pointer.active) { follow.x = x; follow.y = y }
       pointer.x = x
       pointer.y = y
       pointer.active = true
+      const last = trail[trail.length - 1]
+      if (!last || Math.hypot(x - last.x, y - last.y) > 2) {
+        trail.push({ x, y, time: performance.now() })
+        if (trail.length > 24) trail.shift()
+      }
     }
     function startTouch(event) { if (event.pointerType === 'touch') movePointer(event) }
-    function resetPointer() { pointer.active = false }
+    function resetPointer() { pointer.active = false; trail = [] }
     function releasePointer(event) { if (event.pointerType !== 'mouse') resetPointer() }
     function leaveWindow(event) { if (!event.relatedTarget) resetPointer() }
     function updateBounds() { bounds = canvas.getBoundingClientRect(); resetPointer() }
@@ -176,7 +208,6 @@ export default function ParticleBackground({ paused }) {
       <div className="light-ribbon ribbon-front" />
       <div className="horizon-light" />
     </div>
-    <div className="cursor-aura" />
     <canvas ref={canvasRef} />
   </div>
 }
