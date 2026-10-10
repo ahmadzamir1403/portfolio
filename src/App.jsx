@@ -4,7 +4,6 @@ import './App.css'
 import ParticleBackground from './components/ParticleBackground'
 import WelcomeScreen from './components/WelcomeScreen'
 import LandingParticles from './components/LandingParticles'
-import { ENTRY_PARTICLE_DURATION } from './components/landingParticleMotion'
 import ReactiveName from './components/ReactiveName'
 import ScrollSpace from './components/ScrollSpace'
 import ProjectTooltip from './components/ProjectTooltip'
@@ -70,7 +69,6 @@ export default function App() {
   const profileRef = useRef(null)
   const [portraitFlight, setPortraitFlight] = useState(null)
   const [entryParticles, setEntryParticles] = useState(false)
-  const particleTimer = useRef(null)
   const flightTimer = useRef(null)
   const featuredArtRef = useRef(null)
   const enteredFromWelcome = useRef(false)
@@ -92,13 +90,11 @@ export default function App() {
     if (!source || !target || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     setPortraitFlight({ x: source.left, y: source.top, size: source.width, targetX: target.left - source.left, targetY: target.top - source.top, scale: target.width / source.width })
     setEntryParticles(true)
-    particleTimer.current = window.setTimeout(() => setEntryParticles(false), ENTRY_PARTICLE_DURATION + 80)
     flightTimer.current = window.setTimeout(() => setPortraitFlight(null), 960)
   }, [])
   useEffect(() => () => {
     window.clearTimeout(previewTimer.current)
     window.clearTimeout(flightTimer.current)
-    window.clearTimeout(particleTimer.current)
   }, [])
   const enterPortfolio = useCallback(() => {
     enteredFromWelcome.current = true

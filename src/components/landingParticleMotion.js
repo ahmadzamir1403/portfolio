@@ -52,8 +52,7 @@ export function beginParticleEntry(particles, width, height) {
 // Burst apart first, then curl into a visible ring around the header portrait.
 export function stepParticleEntry(particles, progress, target) {
   for (const particle of particles) {
-    const fade = progress >= 1 ? 1 : Math.max(0, Math.min(1, (progress - .9) / .1))
-    particle.opacity = particle.entryOpacity * (1 - fade)
+    particle.opacity = particle.entryOpacity
     if (progress < .22) {
       const t = Math.max(0, progress / .22)
       const eased = 1 - (1 - t) ** 3

@@ -111,6 +111,7 @@ export default function LandingParticles({ paused, entering, targetRef }) {
           const progress = (now - entryStart) / ENTRY_PARTICLE_DURATION
           stepParticleEntry(particles, progress, target)
           draw()
+          // Leave the completed ring painted, with no ongoing animation work.
           if (progress >= 1) { frame = 0; return }
         } else {
           stepParticleLine(particles, delta, elapsed)
