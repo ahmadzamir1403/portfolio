@@ -141,3 +141,13 @@ Keep all three recognizable and same sizes throughout, clean original Japanese a
 - Pause/resume keeps the current particle positions. Resizing preserves positions and velocities relative to the viewport rather than restarting the entrance. Reduced motion shows the aligned stream immediately.
 - Particle rendering uses crisp cores approximately 1.1–4.2 CSS pixels across with a soft warm glow behind each point. Three cached glow textures avoid creating gradients per particle per frame. Density is 780 particles on desktop and 400 on mobile. Canvas resolution follows device pixel ratio up to 2× for sharper edges on high-density screens; gathering and continuous flow remain.
 - Validation: lint and production build pass. Desktop (1440 × 900) and mobile (390 × 844) motion checks confirm initial scattering and gathering, roughly 70 pixels of continued movement over two seconds, finite positions through a minute of flow, recycling beyond the visible edges, and click scatter/return. Browser visual QA remains unavailable in this session.
+
+
+## Observatory atmosphere
+
+- Added src/Atmosphere.css as the final visual layer: deep blue-charcoal shadows, silver moonlight from the upper right, muted gold highlights, static fine grain, and translucent cards with illuminated top/right edges.
+- Enlarged the welcome moon and placed it partly beyond the right edge. Kept the existing moon battle; responsive rules reduce the moon on narrow/short screens.
+- Main sections now share a continuously visible star field and haze. Stars shift less than the haze during horizontal navigation; warm lower lighting softens across the panels. Pause and reduced motion suppress parallax.
+- Landing dust now separates cool distant particles, gold middle particles, and a small number of diffuse foreground lights, using the existing cached glow sprites and animation loop.
+- Updated browser/PWA background colors to match. No dependencies added.
+- Validation: production Vite build and PWA generation passed. Browser visual verification unavailable because the browser tool reports no connected browsers.

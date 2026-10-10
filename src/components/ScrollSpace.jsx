@@ -27,6 +27,7 @@ export default function ScrollSpace({ active, paused, trackRef }) {
       backdrop.style.setProperty('--space-progress', progress.toFixed(4))
       backdrop.style.setProperty('--moon-reveal', moon.toFixed(4))
       backdrop.style.setProperty('--battle-play-state', !paused && !motion.matches && moon > 0.05 ? 'running' : 'paused')
+      backdrop.style.setProperty('--star-drift', !paused && !motion.matches ? -progress * 18 + 'px' : '0px')
       backdrop.style.setProperty('--space-drift', !paused && !motion.matches ? -progress * 55 + 'px' : '0px')
     }
     function schedule() {

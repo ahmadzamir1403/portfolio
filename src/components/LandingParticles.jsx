@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom'
 import { beginParticleEntry, beginParticleReturn, createParticleLine, ENTRY_PARTICLE_DURATION, stepParticleEntry, stepParticleLine, stepParticleReturn } from './landingParticleMotion'
 import './ParticleBackground.css'
 
-const colors = ['244, 225, 188', '208, 179, 133', '177, 145, 103']
+const colors = ['244, 225, 188', '214, 180, 128', '169, 191, 216']
 
 export default function LandingParticles({ paused, entering, returning, targetRef }) {
   const canvasRef = useRef(null)
@@ -56,9 +56,11 @@ export default function LandingParticles({ paused, entering, returning, targetRe
       for (const particle of particles) {
         const opacity = (.24 + particle.depth * .5) * particle.opacity
         const colorIndex = particle.depth > .96 ? 0 : particle.depth > .65 ? 1 : 2
-        const glowRadius = particle.radius * 3.5
+        const foreground = particle.depth > .96
+        const glowRadius = particle.radius * (foreground ? 8 : 3.5)
         context.globalAlpha = opacity
         context.drawImage(glows[colorIndex], particle.x - glowRadius, particle.y - glowRadius, glowRadius * 2, glowRadius * 2)
+        if (foreground) continue
         context.fillStyle = `rgb(${colors[colorIndex]})`
         context.beginPath()
         context.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2)

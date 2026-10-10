@@ -1,18 +1,10 @@
-.scroll-space {
-  position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none;
-  background: #222124; opacity: var(--space-progress, 0); contain: strict;
-}
-.scroll-nebula {
-  position: absolute; inset: -6%;
-  background: radial-gradient(ellipse at 82% 20%, #75604c2e, transparent 55%), radial-gradient(ellipse at 12% 70%, #a1958514, transparent 45%), radial-gradient(ellipse at 90% 85%, #9b794c1f, transparent 42%);
-  transform: translate3d(var(--space-drift, 0px), 0, 0);
-}
-.scroll-stars { position: absolute; inset: -5% -4%; width: 108%; height: 110%; transform: translate3d(var(--space-drift, 0px), 0, 0); }
-.scroll-moon { position: absolute; top: 18%; right: 4%; width: clamp(90px, 11vw, 160px); height: auto; opacity: calc(var(--moon-reveal, 0) * .65); transform: translate3d(var(--space-drift, 0px), 0, 0); filter: drop-shadow(0 0 20px #ebe9e612); }
-.scroll-vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 25%, #11100f55 100%); }
-@media (max-width: 640px) { .scroll-moon { display: none; } .star-secondary { display: none; } }
+.scroll-space { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; background: #0d111a; contain: strict; }
+.scroll-nebula { position: absolute; inset: -6%; background: radial-gradient(ellipse at 91% 16%, #6686ab38, transparent 52%), radial-gradient(ellipse at 70% 52%, #8daac015, transparent 48%); transform: translate3d(var(--space-drift, 0px), 0, 0); }
+.scroll-nebula::after { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 74% 95%, #c2995c26, transparent 56%), radial-gradient(ellipse at 10% 66%, #73563817, transparent 44%); opacity: calc(.8 - var(--space-progress, 0) * .45); }
+.scroll-stars { position: absolute; inset: -5% -4%; width: 108%; height: 110%; opacity: .38; transform: translate3d(var(--star-drift, 0px), 0, 0); mask-image: linear-gradient(90deg, #0004, #000); }
+.scroll-moon { position: absolute; top: 18%; right: -65px; width: clamp(180px, 20vw, 290px); opacity: calc(.18 + var(--moon-reveal, 0) * .22); transform: translate3d(var(--space-drift, 0px), 0, 0); }
+.scroll-moon::before { content: ''; position: absolute; inset: -35%; border-radius: 50%; background: radial-gradient(circle, #bedbf32b, transparent 70%); }
+.scroll-moon-disc { display: block; width: 100%; height: auto; }
+.scroll-vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at 60% 42%, transparent 25%, #03071099 100%), linear-gradient(0deg, #06091155, transparent 24%); }
+@media (max-width: 640px) { .scroll-moon { display: none; } .star-secondary { display: none; } .scroll-stars { opacity: .28; } }
 @media (prefers-reduced-motion: reduce) { .scroll-nebula, .scroll-stars, .scroll-moon { transform: none; } }
-
-.scroll-moon { opacity: var(--moon-reveal, 0); }
-.scroll-moon-disc { display: block; width: 100%; height: auto; opacity: .65; }
-

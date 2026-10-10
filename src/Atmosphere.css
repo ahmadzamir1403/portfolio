@@ -1,0 +1,35 @@
+/* Shared moonlight keeps the welcome and horizontal panels in the same scene. */
+:root { --moonlight: 165, 190, 220; --accent: #d0ad79; --warm: #d0ad79; --line: #bdcce01c; }
+.console { background: #0d111a; }
+.console .ambient { height: 100%; background: radial-gradient(ellipse at 85% 18%, #a7c3e00d, transparent 52%), radial-gradient(ellipse at 65% 95%, #ba854b10, transparent 55%); mask-image: none; }
+.welcome-screen { background: radial-gradient(ellipse at 94% 23%, #34455c 0%, #192331 27%, transparent 60%), radial-gradient(ellipse at 15% 90%, #4e3c2b38, transparent 50%), #0b0f17; }
+.welcome-screen::before, .console::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: url('/images/atmosphere-grain.svg') repeat; opacity: .035; }
+.welcome-screen::before { z-index: -1; }
+.console::after { z-index: 2; }
+.welcome-screen::after { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: radial-gradient(ellipse at 50% 44%, transparent 24%, #05081088 100%), linear-gradient(0deg, #070a1280, transparent 30%); }
+.welcome-identity { margin-top: -55px; }
+.welcome-identity h1 { text-shadow: 0 2px 36px #0a101c, 0 0 90px #bdd5f01c; }
+.welcome-subtitle { color: #b6c0cf; }
+.welcome-top, .welcome-motion { color: #bec9d8; }
+.welcome-portrait { border-color: #cbdcee99; outline-color: #c6d5e52e; box-shadow: 12px -8px 42px #b5d1ee1c, -12px 20px 42px #02060d80; }
+.welcome-prompt { bottom: max(12%, 70px); }
+.welcome-enter-label { color: #d9c7ac; letter-spacing: 1.2px; font-size: 11px; background: #0a101826; border: 1px solid #d6bb8e26; border-radius: 30px; padding: 13px 24px; }
+.welcome-enter:hover .welcome-enter-label { background: #d0ad7910; border-color: #d0ad7959; }
+.console .particle-background { height: 100%; --light-color: 209, 173, 120; mask-image: linear-gradient(#000 0%, #000 80%, transparent); }
+.console .light-ribbon { border-top-color: #cfb18412; opacity: .45; top: 50%; }
+.console .ribbon-back { opacity: .2; top: 44%; }
+.console .horizon-light { top: auto; bottom: -15%; right: -10%; opacity: .6; }
+.console .cursor-aura { opacity: calc(var(--pointer-opacity, 0) * .65); }
+.site-header .header-contact-card { background: linear-gradient(125deg, #111722b8, #1e2b3ac2); border-color: #c3d6ea21; border-top-color: #d2e1ef38; border-right-color: #d2e1ef38; box-shadow: 0 12px 30px #02060d24; }
+.skill-card, .contact-panel { background: linear-gradient(125deg, #111721b8, #1e2b3a85); border-color: #c3d6ea1c; border-top-color: #d2e1ef38; border-right-color: #d2e1ef38; box-shadow: -8px 18px 45px #02060d33; }
+.skill-card > span:last-child { color: #bec8d3; }
+.tags li { border-color: #c1ccd42b; background: #c5a16c0b; }
+.project-tile.is-selected > .project-art { outline-color: #ddd6c8; box-shadow: 0 0 30px #d0ad7926, 0 12px 30px #02060d66; }
+.project-tooltip { background: #101722f5; border-color: #c9d8e13d; }
+.side-scroll-footer { border-top-color: #bbcfe018; }
+@media (max-width: 640px) {
+  .welcome-identity { margin-top: -30px; }
+  .welcome-screen { background: radial-gradient(ellipse at 110% 15%, #30435b, transparent 62%), radial-gradient(ellipse at 0% 90%, #58412c26, transparent 55%), #0b0f17; }
+  .welcome-subtitle { max-width: 260px; margin-inline: auto; }
+}
+@media (max-height: 540px) { .welcome-identity { margin-top: -35px; } .welcome-prompt { bottom: 24px; } }

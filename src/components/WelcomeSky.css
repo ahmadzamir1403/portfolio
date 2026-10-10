@@ -1,10 +1,12 @@
-.welcome-space { position: absolute; inset: 0 0 auto; height: min(48svh, 450px); pointer-events: none; z-index: -1; }
-.space-nebula { position: absolute; inset: 0 -10% -60%; background: radial-gradient(ellipse at 72% 15%, #cfb68a1c, transparent 45%), radial-gradient(ellipse at 24% 30%, #d3bc9412, transparent 35%), linear-gradient(#15151433, transparent 80%); mask-image: linear-gradient(#000 60%, transparent); }
-.space-starfield { position: absolute; width: 100%; height: 100%; overflow: visible; }
-.space-moon { position: absolute; top: clamp(85px, 11svh, 135px); right: 17%; width: clamp(125px, 12vw, 198px); aspect-ratio: 1; isolation: isolate; }
-.space-moon::before { content: ''; position: absolute; inset: 12%; border-radius: 50%; background: #e7e4df16; filter: blur(28px); }
-.space-moon img { position: relative; display: block; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0 14px #e3e0da12); }
-@media (min-width: 1600px) { .space-moon { right: 20%; } }
-@media (max-width: 640px) { .welcome-space { height: 32svh; } .space-moon { width: 100px; top: 88px; right: 10%; } .space-starfield { opacity: .7; } }
-@media (max-height: 650px) { .space-moon { width: 90px; top: 70px; right: 17%; } }
+.welcome-space { position: absolute; inset: 0; pointer-events: none; z-index: -1; }
+.space-nebula { position: absolute; inset: 0; background: radial-gradient(ellipse at 97% 26%, #b6d4ef26, transparent 43%), radial-gradient(ellipse at 73% 49%, #8ea9c414, transparent 40%), radial-gradient(ellipse at 17% 84%, #c59a6012, transparent 40%); }
+.space-nebula::after { content: ''; position: absolute; width: 140%; height: 35%; left: -20%; top: 54%; transform: rotate(-18deg); background: radial-gradient(ellipse, #c5a16c12, transparent 65%); filter: blur(28px); }
+.space-starfield { position: absolute; width: 100%; height: 100%; opacity: .55; mask-image: radial-gradient(ellipse at 48% 44%, transparent 8%, #0009 42%, #000 80%); }
+.space-moon { position: absolute; top: clamp(145px, 22svh, 230px); right: -42px; width: clamp(220px, 23vw, 350px); aspect-ratio: 1; isolation: isolate; }
+.space-moon::before { content: ''; position: absolute; inset: -40%; border-radius: 50%; background: radial-gradient(circle, #c2daee22, #91b1d20b 45%, transparent 70%); }
+.space-moon img { position: relative; display: block; width: 100%; height: 100%; object-fit: contain; opacity: .86; filter: drop-shadow(-12px 7px 26px #adcce01a); }
+@media (min-width: 1600px) { .space-moon { right: 2%; } }
+@media (max-width: 900px) { .space-moon { width: 210px; right: -60px; } }
+@media (max-width: 640px) { .space-moon { width: 150px; top: 100px; right: -38px; } .space-starfield { opacity: .38; } .space-nebula::after { filter: none; } }
+@media (max-height: 650px) and (min-width: 641px) { .space-moon { width: 180px; top: 120px; right: -35px; } }
 @media (max-height: 440px) { .space-moon { display: none; } }

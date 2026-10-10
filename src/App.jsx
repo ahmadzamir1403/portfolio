@@ -11,6 +11,7 @@ import ProjectTooltip from './components/ProjectTooltip'
 import useSideScroll from './components/useSideScroll'
 import useClickSound from './components/useClickSound'
 import './components/SideScroll.css'
+import './Atmosphere.css'
 
 const linkedin = 'https://www.linkedin.com/in/ahmad-zamir-823105232'
 const email = 'https://mail.google.com/mail/?view=cm&fs=1&to=ahmadzamir1403%40gmail.com'
